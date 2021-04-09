@@ -13,6 +13,7 @@
     <PackageReference Include="Avalonia.Desktop" Version="0.10.0" />
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0" />
+    <PackageReference Include="DotNano.RpcApi" Version="0.3.0" />
     <PackageReference Include="NdefLibrary" Version="4.1.0" />
     <PackageReference Include="PCSC" Version="5.0.0" />
     <PackageReference Include="PCSC.Iso7816" Version="5.0.0" />
