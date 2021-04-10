@@ -1,14 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using DotNano.RpcApi.Responses;
-using DotNano.Shared.DataTypes;
 using Nandro.ViewModels;
 using Nandro.Views;
-using System.Collections.Generic;
 using System.Numerics;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace Nandro
 {
@@ -22,19 +18,29 @@ namespace Nandro
 
             AvaloniaXamlLoader.Load(this);
 
-            _mainWindowVM.DisplayQR();
+            var config = new Configuration();
+            config.NanoSocketUri = "wss://socket2.nanos.cc";
 
-            var settings = new JsonSerializerOptions
+            var nanoAccount = "nano_1iuz18n4g4wfp9gf7p1s8qkygxw7wx9qfjq6a9aq68uyrdnningdcjontgar";
+            var amount = BigInteger.Parse("100000000000000000000000000");
+            _mainWindowVM.DisplayQR(nanoAccount, amount);
+
+            Task.Run(() =>
             {
-                PropertyNameCaseInsensitive = true, NumberHandling = JsonNumberHandling.AllowReadingFromString
-            };
-            settings.Converters.Add(new PublicAddressConverter());
-            settings.Converters.Add(new BigIntegerConverter());
-            settings.Converters.Add(new HexKey64Converter());
+                using var apiClient = new NanoApiClient("https://proxy.nanos.cc/proxy");
+                using var nanoSocket = new NanoSocket();
+                var monitor = new TransactionMonitor(nanoSocket, apiClient, config);
 
-            using var apiClient = new NanoApiClient("https://proxy.nanos.cc/proxy");
-            var response = apiClient.AccountHistory("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk");
-            var history = JsonSerializer.Deserialize<AccountHistoryResponse>(response, settings);
+                var result = false;
+                var (frontier, pendingTxs, connected) = monitor.Prepare(nanoAccount);
+                if (connected)
+                    result = monitor.VerifyWithSocket(nanoAccount, amount);
+                else
+                    result = monitor.VerifyWithNanoClient(nanoAccount, amount, frontier, pendingTxs?.Keys);
+            });
+
+
+            //var response = apiClient.GetLatestTransaction("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk");
 
             //using var socket = new NanoSocket();
             //if (socket.Subscribe("wss://socket.nanos.cc", "nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk"))
@@ -55,47 +61,6 @@ namespace Nandro
             }
 
             base.OnFrameworkInitializationCompleted();
-        }
-
-        
-    }
-
-    class PublicAddressConverter : JsonConverter<PublicAddress>
-    {
-        public override PublicAddress? Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options)
-        {
-            return new PublicAddress(reader.GetString());
-        }
-
-        public override void Write(Utf8JsonWriter writer, PublicAddress value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString());
-        }
-    }
-
-    class HexKey64Converter : JsonConverter<HexKey64>
-    {
-        public override HexKey64? Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options)
-        {
-            return new HexKey64(reader.GetString());
-        }
-
-        public override void Write(Utf8JsonWriter writer, HexKey64 value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString());
-        }
-    }
-
-    class BigIntegerConverter : JsonConverter<BigInteger>
-    {
-        public override BigInteger Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options)
-        {
-            return BigInteger.Parse(reader.GetString());
-        }
-
-        public override void Write(Utf8JsonWriter writer, BigInteger value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString());
-        }
+        }        
     }
 }

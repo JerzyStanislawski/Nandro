@@ -1,6 +1,7 @@
 using QRCoder;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Numerics;
 using System.Text;
 
 namespace Nandro.ViewModels
@@ -13,9 +14,9 @@ namespace Nandro.ViewModels
 
         public string Block { get; set; }
 
-        public void DisplayQR()
+        public void DisplayQR(string nanoAccount, BigInteger amount)
         {
-            var data = "nano:nano_3wm37qz19zhei7nzscjcopbrbnnachs4p1gnwo5oroi3qonw6inwgoeuufdp?amount=150000000000000000000000000000";
+            var data = $"nano:{nanoAccount}?amount={amount}";
 
             using var qrGenerator = new QRCodeGenerator();
             var qrData = qrGenerator.CreateQrCode(Encoding.UTF8.GetBytes(data), QRCodeGenerator.ECCLevel.H);

@@ -56,7 +56,9 @@ namespace Nandro
             }
         }
 
-        private T? Receive<T>() where T : class
+        public bool Connected => _socket?.State == WebSocketState.Open;
+
+        private T Receive<T>() where T : class
         {
             using var tokenSource = new CancellationTokenSource();
             tokenSource.CancelAfter(TimeSpan.FromSeconds(60));
@@ -64,7 +66,6 @@ namespace Nandro
             var bytes = new ArraySegment<byte>(new byte[4096]);
             var result = _socket.ReceiveAsync(bytes, tokenSource.Token).Result;
 
-            var a = Encoding.UTF8.GetString(bytes.Array, 0, result.Count);
             if (result.MessageType != WebSocketMessageType.Close && result.Count > 0)
             {
                 var span = new ReadOnlySpan<byte>(bytes.Array, 0, result.Count);
