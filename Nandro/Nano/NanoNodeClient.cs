@@ -6,15 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace Nandro
+namespace Nandro.Nano
 {
     class NanoNodeClient : INanoClient, IDisposable
     {
         private NanoRpcClient _rpcClient;
 
-        public NanoNodeClient(string ipAddress, int port)
+        public NanoNodeClient(string uri)
         {
-            _rpcClient = new NanoRpcClient(ipAddress, port);
+            _rpcClient = new NanoRpcClient(uri);
         }
 
         public AccountHistoryHistory GetLatestTransaction(string account)

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Numerics;
 
-namespace Nandro
+namespace Nandro.Nano
 {
     class NanoApiClient : INanoClient, IDisposable
     {
@@ -72,6 +72,7 @@ namespace Nandro
             var url = $"{_url}/?action=pending&account={account}&source=true";
             var result = _apiClient.GetAsync(url).Result;
 
+            var a = result.Content.ReadAsStringAsync().Result;
             if (result.IsSuccessStatusCode)
             {
                 var pendingBlocks = JsonConvert.DeserializeObject<PendingResponse>(result.Content.ReadAsStringAsync().Result, _jsonSettings);

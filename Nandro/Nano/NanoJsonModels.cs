@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Nandro
+namespace Nandro.Nano
 {
     class NanoSubscriptionOptions
     {

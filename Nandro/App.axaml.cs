@@ -18,27 +18,20 @@ namespace Nandro
 
             AvaloniaXamlLoader.Load(this);
 
-            var config = new Configuration();
-            config.NanoSocketUri = "wss://socket2.nanos.cc";
+            //var config = new Configuration();
+            //config.NanoSocketUri = "wss://socket2.nanos.cc";
 
-            var nanoAccount = "nano_1iuz18n4g4wfp9gf7p1s8qkygxw7wx9qfjq6a9aq68uyrdnningdcjontgar";
-            var amount = BigInteger.Parse("100000000000000000000000000");
-            _mainWindowVM.DisplayQR(nanoAccount, amount);
+            //var nanoAccount = "nano_3wm37qz19zhei7nzscjcopbrbnnachs4p1gnwo5oroi3qonw6inwgoeuufdp";
+            //var amount = BigInteger.Parse("100000000000000000000000000");
+            //_mainWindowVM.DisplayQR(nanoAccount, amount);
 
-            Task.Run(() =>
-            {
-                using var apiClient = new NanoApiClient("https://proxy.nanos.cc/proxy");
-                using var nanoSocket = new NanoSocket();
-                var monitor = new TransactionMonitor(nanoSocket, apiClient, config);
-
-                var result = false;
-                var (frontier, pendingTxs, connected) = monitor.Prepare(nanoAccount);
-                if (connected)
-                    result = monitor.VerifyWithSocket(nanoAccount, amount);
-                else
-                    result = monitor.VerifyWithNanoClient(nanoAccount, amount, frontier, pendingTxs?.Keys);
-            });
-
+            //Task.Run(() =>
+            //{
+            //    using var apiClient = new NanoNodeClient("https://proxy.nanos.cc/proxy");
+            //    using var nanoSocket = new NanoSocketClient();
+            //    var monitor = new TransactionMonitor(nanoSocket, apiClient, config);
+            //});
+            
 
             //var response = apiClient.GetLatestTransaction("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk");
 

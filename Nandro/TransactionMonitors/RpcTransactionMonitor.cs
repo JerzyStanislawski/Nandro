@@ -1,4 +1,5 @@
 ﻿using DotNano.RpcApi.Responses;
+using Nandro.Nano;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,58 +7,20 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Nandro
+namespace Nandro.TransactionMonitors
 {
-    class TransactionMonitor
+    class RpcTransactionMonitor
     {
-        private readonly NanoSocket _socket;
         private readonly INanoClient _nanoClient;
-        private readonly Configuration _config;
 
-        public TransactionMonitor(NanoSocket socket, INanoClient nanoClient, Configuration config)
+        public (string, IDictionary<string, BigInteger>) Prepare(string nanoAccount)
         {
-            _socket = socket;
-            _nanoClient = nanoClient;
-            _config = config;
-        }
-
-        public (string, IDictionary<string, BigInteger>, bool) Prepare(string nanoAccount)
-        {
-            var connected = _socket.Subscribe(_config.NanoSocketUri, nanoAccount);
-
-            if (!connected)
-            {
                 var frontier = _nanoClient.GetFrontier(nanoAccount);
                 var pendingTxs = _nanoClient.GetPendingTxs(nanoAccount);
-                return (frontier, pendingTxs, connected);
-            }
-            else
-                return (null, null, true);
+                return (frontier, pendingTxs);
         }
 
-        public bool VerifyWithSocket(string nanoAccount, BigInteger raw)
-        {
-            try
-            {
-                if (_socket.Connected)
-                {
-                    NanoConfirmationResponse response;
-                    do
-                    {
-                        response = _socket.Listen();
-                        if (VerifySocketResponse(response, raw, nanoAccount))
-                            return true;
-                    }
-                    while (response != null);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            return false;
-        }
-
-        public bool VerifyWithNanoClient(string nanoAccount, BigInteger raw, string previousHash, IEnumerable<string> pendingHashes)
+        public bool Verify(string nanoAccount, BigInteger raw, string previousHash, IEnumerable<string> pendingHashes)
         {
             using var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(60));
@@ -81,16 +44,6 @@ namespace Nandro
             });
 
             return task.Result;
-        }
-
-        private bool VerifySocketResponse(NanoConfirmationResponse response, BigInteger raw, string nanoReceiveAddress)
-        {
-            if (response == null || response.Message == null)
-                return false;
-
-            var amount = BigInteger.Parse(response.Message.Amount);
-
-            return response.Message.Block.Subtype == "send" && response.Message.Block.LinkAsAccount == nanoReceiveAddress && amount == raw;
         }
 
 

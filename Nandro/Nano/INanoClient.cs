@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace Nandro
+namespace Nandro.Nano
 {
     internal interface INanoClient
     {

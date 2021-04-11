@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Net.WebSockets;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 
-namespace Nandro
+namespace Nandro.Nano
 {
-    class NanoSocket : IDisposable
+    class NanoSocketClient : INanoSocketClient, IDisposable
     {
         private readonly ClientWebSocket _socket;
 
-        public NanoSocket()
+        public NanoSocketClient()
         {
             _socket = new ClientWebSocket();
         }
