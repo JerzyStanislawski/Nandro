@@ -12,6 +12,13 @@ namespace Nandro.TransactionMonitors
     class RpcTransactionMonitor
     {
         private readonly INanoClient _nanoClient;
+        private readonly Configuration _config;
+
+        public RpcTransactionMonitor(INanoClient nanoClient, Configuration config)
+        {
+            _nanoClient = nanoClient;
+            _config = config;
+        }
 
         public (string, IDictionary<string, BigInteger>) Prepare(string nanoAccount)
         {
@@ -23,7 +30,7 @@ namespace Nandro.TransactionMonitors
         public bool Verify(string nanoAccount, BigInteger raw, string previousHash, IEnumerable<string> pendingHashes)
         {
             using var cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(60));
+            cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(_config.TransactionTimeoutSec));
 
             var task = Task.Run(() =>
             {

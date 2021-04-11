@@ -51,7 +51,7 @@ namespace Nandro.Nano
             if (response.IsSuccessful)
             {
                 if (response.Blocks.Any())
-                    return (IDictionary<string, BigInteger>)response.Blocks.ToDictionary(x => x.Key, x => x.Value.Amount);
+                    return response.Blocks.ToDictionary(x => x.Key.HexKeyString, x => x.Value.Amount);
                 else
                     return null;
             }

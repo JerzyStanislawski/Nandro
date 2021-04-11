@@ -1,34 +1,32 @@
 ﻿using System;
 using System.Net.WebSockets;
 using System.Text.Json;
-using System.Threading;
 
 namespace Nandro.Nano
 {
     class NanoSocketClient : INanoSocketClient, IDisposable
     {
-        private readonly ClientWebSocket _socket;
+        private readonly IWebSocket _socket;
+        private readonly Configuration _config;
 
-        public NanoSocketClient()
+        public NanoSocketClient(IWebSocket webSocket, Configuration config)
         {
-            _socket = new ClientWebSocket();
+            _socket = webSocket;
+            _config = config;
         }
 
         public bool Subscribe(string url, string nanoAddress)
         {
             try
             {
-                using var tokenSource = new CancellationTokenSource();
-                tokenSource.CancelAfter(TimeSpan.FromSeconds(10));
-
-                _socket.ConnectAsync(new Uri(url), tokenSource.Token).Wait();
+                _socket.Connect(url);
 
                 var payload = CreateSubscriptionJsonPayload(nanoAddress);
-                _socket.SendAsync(payload, WebSocketMessageType.Text, true, tokenSource.Token).Wait();
+                _socket.Send(payload);
 
-                var result = Receive<NanoAckResponse>();
+                var result = Receive<NanoAckResponse>(10);
 
-                return result.Ack == "subscribe";
+                return result?.Ack == "subscribe";
             }
             catch
             {
@@ -41,37 +39,36 @@ namespace Nandro.Nano
             if (_socket == null || _socket.State != WebSocketState.Open)
                 return null;
 
-            return Receive<NanoConfirmationResponse>();
+            return Receive<NanoConfirmationResponse>(_config.TransactionTimeoutSec);
         }
 
         public void Close()
         {
             if (_socket != null && _socket.State == WebSocketState.Open)
             {
-                using var tokenSource = new CancellationTokenSource();
-                tokenSource.CancelAfter(TimeSpan.FromSeconds(10));
-
-                _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, tokenSource.Token);
+                _socket.Close();
             }
         }
 
         public bool Connected => _socket?.State == WebSocketState.Open;
 
-        private T Receive<T>() where T : class
+        private T Receive<T>(int timeoutSec) where T : class
         {
-            using var tokenSource = new CancellationTokenSource();
-            tokenSource.CancelAfter(TimeSpan.FromSeconds(60));
-
-            var bytes = new ArraySegment<byte>(new byte[4096]);
-            var result = _socket.ReceiveAsync(bytes, tokenSource.Token).Result;
-
-            if (result.MessageType != WebSocketMessageType.Close && result.Count > 0)
+            try
             {
-                var span = new ReadOnlySpan<byte>(bytes.Array, 0, result.Count);
-                return JsonSerializer.Deserialize<T>(span);
+                var bytes = new ArraySegment<byte>(new byte[4096]);
+                var result = _socket.Receive(bytes, timeoutSec);
+
+                if (result.MessageType != WebSocketMessageType.Close && result.Count > 0)
+                {
+                    var span = new ReadOnlySpan<byte>(bytes.Array, 0, result.Count);
+                    return JsonSerializer.Deserialize<T>(span);
+                }
             }
-            else
-                return null;
+            catch (AggregateException e) when (e.InnerException is OperationCanceledException)
+            {
+            }
+            return null;
         }
 
         private ArraySegment<byte> CreateSubscriptionJsonPayload(string nanoAddress)

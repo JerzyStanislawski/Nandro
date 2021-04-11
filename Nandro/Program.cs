@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Nandro.Tests")]
 namespace Nandro
 {
     class Program

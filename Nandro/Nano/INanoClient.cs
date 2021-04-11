@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Nandro.Nano
 {
-    internal interface INanoClient
+    public interface INanoClient
     {
         AccountHistoryHistory GetLatestTransaction(string account);
         string GetFrontier(string account);

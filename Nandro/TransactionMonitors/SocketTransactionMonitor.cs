@@ -1,6 +1,7 @@
 ﻿using Nandro.Nano;
 using System;
 using System.Numerics;
+using System.Threading;
 
 namespace Nandro.TransactionMonitors
 {
@@ -24,6 +25,9 @@ namespace Nandro.TransactionMonitors
         {
             try
             {
+                using var cancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(_config.TransactionTimeoutSec));
+
                 if (_socket.Connected)
                 {
                     NanoConfirmationResponse response;
@@ -33,7 +37,7 @@ namespace Nandro.TransactionMonitors
                         if (VerifySocketResponse(response, raw, nanoAccount))
                             return true;
                     }
-                    while (response != null);
+                    while (response != null && !cancellationTokenSource.IsCancellationRequested);
                 }
             }
             catch (OperationCanceledException)

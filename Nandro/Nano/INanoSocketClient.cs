@@ -1,6 +1,6 @@
 ﻿namespace Nandro.Nano
 {
-    internal interface INanoSocketClient
+    public interface INanoSocketClient
     {
         bool Subscribe(string url, string nanoAddress);
         NanoConfirmationResponse Listen();
