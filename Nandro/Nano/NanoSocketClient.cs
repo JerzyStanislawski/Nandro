@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.WebSockets;
 using System.Text.Json;
+using System.Threading;
 
 namespace Nandro.Nano
 {
@@ -24,7 +25,7 @@ namespace Nandro.Nano
                 var payload = CreateSubscriptionJsonPayload(nanoAddress);
                 _socket.Send(payload);
 
-                var result = Receive<NanoAckResponse>(10);
+                var result = Receive<NanoAckResponse>(10, CancellationToken.None);
 
                 return result?.Ack == "subscribe";
             }
@@ -34,30 +35,36 @@ namespace Nandro.Nano
             }
         }
 
-        public NanoConfirmationResponse Listen()
+        public NanoConfirmationResponse Listen(CancellationToken cancellationToken)
         {
             if (_socket == null || _socket.State != WebSocketState.Open)
                 return null;
 
-            return Receive<NanoConfirmationResponse>(_config.TransactionTimeoutSec);
+            return Receive<NanoConfirmationResponse>(_config.TransactionTimeoutSec, cancellationToken);
         }
 
         public void Close()
         {
-            if (_socket != null && _socket.State == WebSocketState.Open)
+            try
             {
-                _socket.Close();
+                if (_socket != null && _socket.State == WebSocketState.Open)
+                {
+                    _socket.Close();
+                }
+            }
+            catch
+            {
             }
         }
 
         public bool Connected => _socket?.State == WebSocketState.Open;
 
-        private T Receive<T>(int timeoutSec) where T : class
+        private T Receive<T>(int timeoutSec, CancellationToken cancellationToken) where T : class
         {
             try
             {
                 var bytes = new ArraySegment<byte>(new byte[4096]);
-                var result = _socket.Receive(bytes, timeoutSec);
+                var result = _socket.Receive(bytes, timeoutSec, cancellationToken);
 
                 if (result.MessageType != WebSocketMessageType.Close && result.Count > 0)
                 {

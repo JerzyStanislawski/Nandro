@@ -16,7 +16,8 @@ namespace Nandro.NFC
 
             if (readerNames.Any())
             {
-                var reader = (ISCardReader)_context.ConnectReader(readerNames[0], SCardShareMode.Shared, SCardProtocol.Any);
+                var a = _context.Connect(readerNames[0], SCardShareMode.Shared, SCardProtocol.Any);
+                var reader = (ICardReader)_context.ConnectReader(readerNames[0], SCardShareMode.Shared, SCardProtocol.Any);
                 return new Device(reader);
             }
 

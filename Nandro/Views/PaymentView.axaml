@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Nandro.Views.PaymentView">
+  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <StackPanel Orientation="Horizontal">
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsUsdChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}">USD</RadioButton>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsEurChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}">EUR</RadioButton>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsNanoChecked}" Command="{Binding Check}">NANO</RadioButton>
+    </StackPanel>
+    <TextBox x:Name="AmountTextBox" Text="{Binding Amount, Mode=TwoWay}" />
+    <TextBlock Text="{Binding NanoAmountText}" IsVisible="{Binding IsFiatVisible}" />
+    <TextBox Text="{Binding NanoAccount}" Watermark="Nano account" Margin="0,15,0,15" />
+    <TextBlock Text="{Binding WarningMessage}" Foreground="Red" Margin="0,15,0,15" />
+    <StackPanel Orientation="Horizontal">
+      <Button Content="Home" Command="{Binding Home}" />
+      <Button Content="Request" Command="{Binding Request}" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

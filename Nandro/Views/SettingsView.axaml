@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Nandro.Views.SettingsView">
+  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="600">
+    <TextBox Text="{Binding NanoAccount}" Watermark="Nano account" Margin="0,15,0,15" />
+    <CheckBox Name="OwnNodeCheckbox" Content="Own Nano node" IsThreeState="False" IsChecked="{Binding OwnNode}" />
+    <TextBox Text="{Binding NodeUri}" Watermark="Nano node URL" Margin="0,15,0,1" 
+             IsEnabled="{Binding ElementName=OwnNodeCheckbox, Path=IsChecked}"/>
+    <Button Content="Test" Command="{Binding TestNodeUri}" HorizontalAlignment="Right"
+            IsEnabled="{Binding ElementName=OwnNodeCheckbox, Path=IsChecked}"/>
+    <TextBox Text="{Binding NodeSocketUri}" Watermark="Nano socket URL" Margin="0,15,0,1"
+             IsEnabled="{Binding ElementName=OwnNodeCheckbox, Path=IsChecked}"/>
+    <Button Content="Test" Command="{Binding TestSocketUri}" HorizontalAlignment="Right"
+            IsEnabled="{Binding ElementName=OwnNodeCheckbox, Path=IsChecked}"/>
+    <StackPanel Orientation="Horizontal">
+      <Button Content="Back" Command="{Binding GoBack}" />
+      <Button Content="Save" Command="{Binding Save}" />      
+    </StackPanel>
+  </StackPanel>
+</UserControl>

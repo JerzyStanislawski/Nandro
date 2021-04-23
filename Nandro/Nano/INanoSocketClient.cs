@@ -1,9 +1,12 @@
-﻿namespace Nandro.Nano
+﻿using System;
+using System.Threading;
+
+namespace Nandro.Nano
 {
-    public interface INanoSocketClient
+    public interface INanoSocketClient : IDisposable
     {
         bool Subscribe(string url, string nanoAddress);
-        NanoConfirmationResponse Listen();
+        NanoConfirmationResponse Listen(CancellationToken cancellationToken);
         void Close();
         bool Connected { get; }
     }

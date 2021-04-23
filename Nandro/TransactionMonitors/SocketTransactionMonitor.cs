@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Nandro.TransactionMonitors
 {
-    class SocketTransactionMonitor
+    class SocketTransactionMonitor : IDisposable
     {
         private readonly INanoSocketClient _socket;
         private readonly Configuration _config;
@@ -16,16 +16,15 @@ namespace Nandro.TransactionMonitors
             _config = config;
         }
 
-        public bool Prepare(string nanoAccount)
+        public bool Prepare(string nanoAccount, string uri)
         {
-            return _socket.Subscribe(_config.NanoSocketUri, nanoAccount);
+            return _socket.Subscribe(uri, nanoAccount);
         }
 
-        public bool Verify(string nanoAccount, BigInteger raw)
+        public bool Verify(string nanoAccount, BigInteger raw, CancellationTokenSource cancellationTokenSource, out string blockHash)
         {
             try
             {
-                using var cancellationTokenSource = new CancellationTokenSource();
                 cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(_config.TransactionTimeoutSec));
 
                 if (_socket.Connected)
@@ -33,9 +32,12 @@ namespace Nandro.TransactionMonitors
                     NanoConfirmationResponse response;
                     do
                     {
-                        response = _socket.Listen();
+                        response = _socket.Listen(cancellationTokenSource.Token);
                         if (VerifySocketResponse(response, raw, nanoAccount))
+                        {
+                            blockHash = response.Message.Hash;
                             return true;
+                        }
                     }
                     while (response != null && !cancellationTokenSource.IsCancellationRequested);
                 }
@@ -43,7 +45,19 @@ namespace Nandro.TransactionMonitors
             catch (OperationCanceledException)
             {
             }
+            finally
+            {
+                if (_socket.Connected)
+                    _socket.Close();
+            }
+
+            blockHash = String.Empty;
             return false;
+        }
+
+        public void Dispose()
+        {
+            _socket.Dispose();
         }
 
         private bool VerifySocketResponse(NanoConfirmationResponse response, BigInteger raw, string nanoReceiveAddress)

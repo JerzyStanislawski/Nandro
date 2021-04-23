@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Net.WebSockets;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Nandro
 {
     public interface IWebSocket : IDisposable
     {
         void Connect(string url);
-        WebSocketReceiveResult Receive(ArraySegment<byte> bytes, int timeoutSec);
+        WebSocketReceiveResult Receive(ArraySegment<byte> bytes, int timeoutSec, CancellationToken cancellationToken);
         void Send(ArraySegment<byte> bytes);
         void Close();
         WebSocketState State { get; }
@@ -30,9 +29,10 @@ namespace Nandro
             _websocket.ConnectAsync(new Uri(url), tokenSource.Token).Wait();
         }
 
-        public WebSocketReceiveResult Receive(ArraySegment<byte> bytes, int timeoutSec)
+        public WebSocketReceiveResult Receive(ArraySegment<byte> bytes, int timeoutSec, CancellationToken cancellationToken)
         {
-            using var tokenSource = GetTokenSource(timeoutSec);
+            using var timeoutTokenSource = GetTokenSource(timeoutSec);
+            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, cancellationToken);
 
             return _websocket.ReceiveAsync(bytes, tokenSource.Token).Result;
         }

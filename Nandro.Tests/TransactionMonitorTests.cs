@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using Xunit;
 
 namespace Nandro.Tests
@@ -38,12 +39,13 @@ namespace Nandro.Tests
 }
 ";
 
-        private TransactionMonitor Initialize(INanoClient nanoClient, IWebSocket socket)
+        private TransactionMonitor Initialize(INanoClient nanoClient, IWebSocket socket, INanoClient localNanoclient = null)
         {
             var config = new Configuration() { TransactionTimeoutSec = 3 };
             var rpcTransactionMonitor = new RpcTransactionMonitor(nanoClient, config);
             var socketTransactionMonitor = new SocketTransactionMonitor(new NanoSocketClient(socket, config), config);
-            var transactionMonitor = new TransactionMonitor(socketTransactionMonitor, rpcTransactionMonitor);
+            var transactionMonitor = localNanoclient == null ? new TransactionMonitor(socketTransactionMonitor, rpcTransactionMonitor, null, config)
+                : new TransactionMonitor(socketTransactionMonitor, rpcTransactionMonitor, new RpcTransactionMonitor(localNanoclient, config), config);
 
             return transactionMonitor;
         }
@@ -57,18 +59,18 @@ namespace Nandro.Tests
             {
                 var socketMessageResponse = new WebSocketReceiveResult(socketMessage.Length, WebSocketMessageType.Text, true);
 
-                A.CallTo(() => socket.Receive(A<ArraySegment<byte>>._, A<int>._))
-                    .Invokes((ArraySegment<byte> output, int _) => Encoding.UTF8.GetBytes(jsonAckResponse, 0, jsonAckResponse.Length, output.Array, 0))
+                A.CallTo(() => socket.Receive(A<ArraySegment<byte>>._, A<int>._, A<CancellationToken>._))
+                    .Invokes((ArraySegment<byte> output, int _, CancellationToken _) => Encoding.UTF8.GetBytes(jsonAckResponse, 0, jsonAckResponse.Length, output.Array, 0))
                     .Returns(ackResponse)
                     .Once()
                     .Then
-                    .Invokes((ArraySegment<byte> output, int _) => Encoding.UTF8.GetBytes(socketMessage, 0, socketMessage.Length, output.Array, 0))
+                    .Invokes((ArraySegment<byte> output, int _, CancellationToken _) => Encoding.UTF8.GetBytes(socketMessage, 0, socketMessage.Length, output.Array, 0))
                     .Returns(socketMessageResponse);
             }
             else
             {
-                A.CallTo(() => socket.Receive(A<ArraySegment<byte>>._, A<int>._))
-                    .Invokes((ArraySegment<byte> output, int _) => Encoding.UTF8.GetBytes(jsonAckResponse, 0, jsonAckResponse.Length, output.Array, 0))
+                A.CallTo(() => socket.Receive(A<ArraySegment<byte>>._, A<int>._, A<CancellationToken>._))
+                    .Invokes((ArraySegment<byte> output, int _, CancellationToken _) => Encoding.UTF8.GetBytes(jsonAckResponse, 0, jsonAckResponse.Length, output.Array, 0))
                     .Returns(ackResponse)
                     .Once()
                     .Then
@@ -84,9 +86,10 @@ namespace Nandro.Tests
             MockSocketResponse(socket, _socketResponse);
 
             var transactionMonitor = Initialize(A.Fake<INanoClient>(), socket);
-            var result = transactionMonitor.Verify("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk", BigInteger.Parse("10000000000000000000000000"));
+            var result = transactionMonitor.Verify("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk", BigInteger.Parse("10000000000000000000000000"), out var hash);
 
             result.Should().BeTrue();
+            hash.Should().Be("7D91514BA4FC1FA6CC1AF547A47AAFB3CF73C367FF44B8E9F63A9B0CF857DB3A");
         }
 
         [Fact]
@@ -96,7 +99,7 @@ namespace Nandro.Tests
             MockSocketResponse(socket, _socketResponse);
 
             var transactionMonitor = Initialize(A.Fake<INanoClient>(), socket);
-            var result = transactionMonitor.Verify("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk", BigInteger.Parse("2000000000000000000000000"));
+            var result = transactionMonitor.Verify("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk", BigInteger.Parse("2000000000000000000000000"), out _);
 
             result.Should().BeFalse();
         }
@@ -108,7 +111,7 @@ namespace Nandro.Tests
             MockSocketResponse(socket, null);
 
             var transactionMonitor = Initialize(A.Fake<INanoClient>(), socket);
-            var result = transactionMonitor.Verify("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk", BigInteger.Parse("10000000000000000000000000000"));
+            var result = transactionMonitor.Verify("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk", BigInteger.Parse("10000000000000000000000000000"), out _);
 
             result.Should().BeFalse();
         }
@@ -132,9 +135,10 @@ namespace Nandro.Tests
             });
 
             var transactionMonitor = Initialize(nanoClient, socket);
-            var result = transactionMonitor.Verify(account, BigInteger.Parse("10000000000000000000000000"));
+            var result = transactionMonitor.Verify(account, BigInteger.Parse("10000000000000000000000000"), out var hash);
 
             result.Should().BeTrue();
+            hash.Should().Be("F544E6C8866616C9EB517DB12D559F39028A9EE141595FB99EA6373B923D8013");
         }
 
         [Fact]
@@ -156,7 +160,7 @@ namespace Nandro.Tests
             });
 
             var transactionMonitor = Initialize(nanoClient, socket);
-            var result = transactionMonitor.Verify(account, BigInteger.Parse("10000000000000000000000000"));
+            var result = transactionMonitor.Verify(account, BigInteger.Parse("10000000000000000000000000"), out _);
 
             result.Should().BeFalse();
         }
@@ -180,7 +184,7 @@ namespace Nandro.Tests
             });
 
             var transactionMonitor = Initialize(nanoClient, socket);
-            var result = transactionMonitor.Verify(account, BigInteger.Parse("10000000000000000000000000"));
+            var result = transactionMonitor.Verify(account, BigInteger.Parse("10000000000000000000000000"), out _);
 
             result.Should().BeFalse();
         }
@@ -221,7 +225,7 @@ namespace Nandro.Tests
                 });
 
             var transactionMonitor = Initialize(nanoClient, socket);
-            var result = transactionMonitor.Verify(account, amount);
+            var result = transactionMonitor.Verify(account, amount, out _);
 
             result.Should().BeFalse();
         }
@@ -247,9 +251,10 @@ namespace Nandro.Tests
                 });
 
             var transactionMonitor = Initialize(nanoClient, socket);
-            var result = transactionMonitor.Verify(account, BigInteger.Parse("10000000000000000000000000"));
+            var result = transactionMonitor.Verify(account, BigInteger.Parse("10000000000000000000000000"), out var hash);
 
             result.Should().BeTrue();
+            hash.Should().Be("001341B8A6EF9D7555458773C2B19C94CBFB835A41DE6853B10F780DF9EA8A05");
         }
 
         [Fact]
@@ -261,10 +266,11 @@ namespace Nandro.Tests
             var socket = A.Fake<IWebSocket>();
             A.CallTo(() => socket.State).Returns(WebSocketState.Closed);
 
-            var nanoClient = A.Fake<INanoClient>();
-            A.CallTo(() => nanoClient.GetFrontier(account)).Returns(null);
-            A.CallTo(() => nanoClient.GetLatestTransaction(account)).Returns(null);
-            A.CallTo(() => nanoClient.GetPendingTxs(account))
+            var publicNanoClient = A.Fake<INanoClient>();
+            var localNanoClient = A.Fake<INanoClient>();
+            A.CallTo(() => localNanoClient.GetFrontier(account)).Returns(null);
+            A.CallTo(() => localNanoClient.GetLatestTransaction(account)).Returns(null);
+            A.CallTo(() => localNanoClient.GetPendingTxs(account))
                 .Returns(new Dictionary<string, BigInteger>
                 {
                     { "001341B8A6EF9D7555458773C2B19C94CBFB835A41DE6853B10F780DF9EA8A05", amount },
@@ -281,10 +287,13 @@ namespace Nandro.Tests
                     { "06C45EBF775A1438339D6176827BD9E68053E524FAA92FD5A6A8CC7DAD344527", amount }
                 });
 
-            var transactionMonitor = Initialize(nanoClient, socket);
-            var result = transactionMonitor.Verify(account, amount);
+            var transactionMonitor = Initialize(publicNanoClient, socket, localNanoClient);
+            var result = transactionMonitor.Verify(account, amount, out var hash);
 
             result.Should().BeTrue();
+            hash.Should().Be("06C45EBF775A1438339D6176827BD9E68053E524FAA92FD5A6A8CC7DAD344527");
+
+            A.CallTo(() => publicNanoClient.GetFrontier(account)).MustNotHaveHappened();
         }
 
         [Fact]
@@ -317,9 +326,48 @@ namespace Nandro.Tests
                 });
 
             var transactionMonitor = Initialize(nanoClient, socket);
-            var result = transactionMonitor.Verify(account, amount);
+            var result = transactionMonitor.Verify(account, amount, out _);
 
             result.Should().BeFalse();
+        }
+
+        [Fact]
+        public void TransactionMonitor_ShouldVerifyTransactionWithPublicRpcClient_WhenLocalClientFails()
+        {
+            const string account = "nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk";
+            var amount = BigInteger.Parse("10000000000000000000000000");
+
+            var socket = A.Fake<IWebSocket>();
+            A.CallTo(() => socket.State).Returns(WebSocketState.Closed);
+
+            var publicNanoClient = A.Fake<INanoClient>();
+            A.CallTo(() => publicNanoClient.GetFrontier(account)).Returns(null);
+            A.CallTo(() => publicNanoClient.GetLatestTransaction(account)).Returns(null);
+            A.CallTo(() => publicNanoClient.GetPendingTxs(account))
+                .Returns(new Dictionary<string, BigInteger>
+                {
+                    { "001341B8A6EF9D7555458773C2B19C94CBFB835A41DE6853B10F780DF9EA8A05", amount },
+                    { "00F95A007E4D21F24D49C0D764CD1BB56FF581A0B2B2A4763D33DC97C9341E03", amount },
+                    { "018F35F0A18E837E30D927410C98E2E00DADE4CF702F1B20AA520AF341385685", amount }
+                })
+                .Once()
+                .Then
+                .Returns(new Dictionary<string, BigInteger>
+                {
+                    { "001341B8A6EF9D7555458773C2B19C94CBFB835A41DE6853B10F780DF9EA8A05", amount },
+                    { "00F95A007E4D21F24D49C0D764CD1BB56FF581A0B2B2A4763D33DC97C9341E03", amount },
+                    { "018F35F0A18E837E30D927410C98E2E00DADE4CF702F1B20AA520AF341385685", amount },
+                    { "06C45EBF775A1438339D6176827BD9E68053E524FAA92FD5A6A8CC7DAD344527", amount }
+                });
+
+            var localNanoClient = A.Fake<INanoClient>();
+            A.CallTo(() => localNanoClient.GetFrontier(account)).Throws<Exception>();
+
+            var transactionMonitor = Initialize(publicNanoClient, socket, localNanoClient);
+            var result = transactionMonitor.Verify(account, amount, out var hash);
+
+            result.Should().BeTrue();
+            hash.Should().Be("06C45EBF775A1438339D6176827BD9E68053E524FAA92FD5A6A8CC7DAD344527");
         }
     }
 }

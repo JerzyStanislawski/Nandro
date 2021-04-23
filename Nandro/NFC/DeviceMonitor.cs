@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Nandro.NFC
 {
-    class Monitor : IDisposable
+    class DeviceMonitor : IDisposable
     {
         private IDeviceMonitor _monitor;
 

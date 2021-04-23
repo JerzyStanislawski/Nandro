@@ -27,9 +27,9 @@ namespace Nandro.TransactionMonitors
                 return (frontier, pendingTxs);
         }
 
-        public bool Verify(string nanoAccount, BigInteger raw, string previousHash, IEnumerable<string> pendingHashes)
+        public bool Verify(string nanoAccount, BigInteger raw, string previousHash, IEnumerable<string> pendingHashes, CancellationTokenSource cancellationTokenSource, out string blockHash)
         {
-            using var cancellationTokenSource = new CancellationTokenSource();
+            blockHash = String.Empty;
             cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(_config.TransactionTimeoutSec));
 
             var task = Task.Run(() =>
@@ -38,19 +38,20 @@ namespace Nandro.TransactionMonitors
                 {
                     var latestBlock = _nanoClient.GetLatestTransaction(nanoAccount);
                     if (VerifyLatestBlock(latestBlock, raw, previousHash))
-                        return true;
+                        return (true, latestBlock.Hash.HexKeyString);
                     var currentPendingTxs = _nanoClient.GetPendingTxs(nanoAccount);
-                    if (VerifyPendingTxs(currentPendingTxs, pendingHashes, raw))
-                        return true;
+                    if (VerifyPendingTxs(currentPendingTxs, pendingHashes, raw, out string pendingBlockHash))
+                        return (true, pendingBlockHash);
 
                     Task.Delay(TimeSpan.FromSeconds(1)).Wait();
                 }
                 while (!cancellationTokenSource.IsCancellationRequested);
 
-                return false;
+                return (false, String.Empty);
             });
 
-            return task.Result;
+            blockHash = task.Result.Item2;
+            return task.Result.Item1;
         }
 
 
@@ -63,7 +64,7 @@ namespace Nandro.TransactionMonitors
         }
 
 
-        private bool VerifyPendingTxs(IDictionary<string, BigInteger> currentPendingTxs, IEnumerable<string> pendingHashes, BigInteger raw)
+        private bool VerifyPendingTxs(IDictionary<string, BigInteger> currentPendingTxs, IEnumerable<string> pendingHashes, BigInteger raw, out string pendingBlockHash)
         {
             var currentPendingHashes = currentPendingTxs.Keys;
             var diff = currentPendingHashes.Except(pendingHashes);
@@ -72,9 +73,14 @@ namespace Nandro.TransactionMonitors
                 foreach (var newPendingHash in diff)
                 {
                     if (currentPendingTxs[newPendingHash] == raw)
+                    {
+                        pendingBlockHash = newPendingHash;
                         return true;
+                    }
                 }
             }
+
+            pendingBlockHash = String.Empty;
             return false;
         }
     }

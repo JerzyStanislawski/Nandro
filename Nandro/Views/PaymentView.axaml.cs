@@ -1,21 +1,17 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using Nandro.ViewModels;
-using ReactiveUI;
 
 namespace Nandro.Views
 {
-    public class MainWindow : ReactiveWindow<MainWindowViewModel>
+    public class PaymentView : ReactiveUserControl<PaymentViewModel>
     {
-        public MainWindow()
+        public TextBox AmountTextBox { get; set; }
+
+        public PaymentView()
         {
-            this.WhenActivated(disposables => { });
             InitializeComponent();
-#if DEBUG
-            this.AttachDevTools();
-#endif
         }
 
         private void InitializeComponent()

@@ -20,21 +20,21 @@ namespace Nandro
 
             AvaloniaXamlLoader.Load(this);
 
-            var config = new Configuration();
-            config.NanoSocketUri = "wss://socket.nanos.cc";
-            config.TransactionTimeoutSec = 60;
+            //var config = new Configuration();
+            //config.NanoSocketUri = "wss://socket.nanos.cc";
+            //config.TransactionTimeoutSec = 60;
 
-            var nanoAccount = "nano_3wm37qz19zhei7nzscjcopbrbnnachs4p1gnwo5oroi3qonw6inwgoeuufdp";
-            var amount = BigInteger.Parse("100000000000000000000000000");
-            _mainWindowVM.DisplayQR(nanoAccount, amount);
+            //var nanoAccount = "nano_3wm37qz19zhei7nzscjcopbrbnnachs4p1gnwo5oroi3qonw6inwgoeuufdp";
+            //var amount = BigInteger.Parse("100000000000000000000000000");
+            ////_mainWindowVM.DisplayQR(nanoAccount, amount);
 
-            Task.Run(() =>
-            {
-                using var apiClient = new NanoNodeClient("https://proxy.nanos.cc/proxy");
-                using var nanoSocket = new NanoSocketClient(new SocketWrapper(), config);
-                var monitor = new TransactionMonitor(new SocketTransactionMonitor(nanoSocket, config), new RpcTransactionMonitor(apiClient, config));
-                monitor.Verify(nanoAccount, amount);
-            });
+            //Task.Run(() =>
+            //{
+            //    using var apiClient = new NanoNodeClient("https://proxy.nanos.cc/proxy");
+            //    using var nanoSocket = new NanoSocketClient(new SocketWrapper(), config);
+            //    var monitor = new TransactionMonitor(new SocketTransactionMonitor(nanoSocket, config), new RpcTransactionMonitor(apiClient, config));
+            //    monitor.Verify(nanoAccount, amount);
+            //});
 
 
             //var response = apiClient.GetLatestTransaction("nano_34prihdxwz3u4ps8qjnn14p7ujyewkoxkwyxm3u665it8rg5rdqw84qrypzk");

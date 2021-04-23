@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>disable</Nullable>
   </PropertyGroup>
@@ -9,16 +9,51 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Assets\fail.png" />
+    <AvaloniaResource Remove="Assets\success.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\fail.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\success.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.0" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.0" />
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0" />
     <PackageReference Include="CoinGeckoAsyncApi" Version="1.4.1" />
     <PackageReference Include="DotNano.RpcApi" Version="0.5.0" />
+    <PackageReference Include="Iot.Device.Bindings" Version="1.4.0" />
     <PackageReference Include="NdefLibrary" Version="4.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="PCSC" Version="5.0.0" />
     <PackageReference Include="PCSC.Iso7816" Version="5.0.0" />
     <PackageReference Include="QRCoder" Version="1.4.1" />
+    <PackageReference Include="ReactiveUI.Validation" Version="2.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Update="Assets\nanoIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\nanoLogo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\PaymentView.axaml.cs">
+      <DependentUpon>PaymentView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\TransactionView.axaml.cs">
+      <DependentUpon>TransactionView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,20 +1,43 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rxui="http://reactiveui.net"
         xmlns:vm="using:Nandro.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Nandro.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/nanoIcon.png"
         Title="Nandro">
+  
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="275"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+    <StackPanel Grid.Row="0" Grid.Column="0" Margin="15,15,15,15">
+      <TextBlock Text="{Binding NanoUsdPrice}" />
+      <TextBlock Text="{Binding NanoEurPrice}" />      
+      <TextBlock Text="Latest transactions" Margin="0,15,0,15"/>
+      <Button Content="{Binding Account}" Command="{Binding ViewAccount}"
+                      Foreground="Blue" Background="Transparent" />
+      <ItemsRepeater Items="{Binding LatestTransactions}">
+        <ItemsRepeater.ItemTemplate>
+        <DataTemplate DataType="vm:TransactionEntry">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Type}" Width="60"/>
+              <Button Content="{Binding AmountText}" Command="{Binding $parent[Window].DataContext.ViewTransactionBlock}" CommandParameter="{Binding Hash}"
+                      Foreground="Blue" Background="Transparent" Width="75" />
+              <TextBlock Text="{Binding RelativeTime}"  Width="100"/>
+            </StackPanel>
+        </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+      </ItemsRepeater>
+    </StackPanel>
+    <rxui:RoutedViewHost Grid.Row="0" Grid.Column="1" Router="{Binding Router}" />
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
-  <DockPanel>
-    <TextBlock Text="{Binding Block}"></TextBlock>
-    <Image Source="{Binding Bitmap}"></Image>
-  </DockPanel>
-
+  </Grid>
 </Window>

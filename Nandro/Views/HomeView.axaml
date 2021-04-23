@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Nandro.Views.HomeView">
+  <StackPanel  HorizontalAlignment="Center"
+               VerticalAlignment="Center" >
+    <Image Source="/Assets/nanoLogo.png" Width="256" Height="256"/>
+    <Button Content="Request payment" Command="{Binding RequestPayment}"            
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center" 
+               Width="135"/>
+    <Button Content="Settings" Command="{Binding Settings}"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               Width="135" /></StackPanel>
+</UserControl>

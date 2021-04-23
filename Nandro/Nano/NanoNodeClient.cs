@@ -31,6 +31,15 @@ namespace Nandro.Nano
                 throw new Exception($"Error from Node: {response.Error}");
         }
 
+        public AccountHistoryResponse GetLatestTransactions(string account, int count)
+        {
+            var response = _rpcClient.AccountHistory(account, count).Result;
+            if (response.IsSuccessful)
+                return response;
+            else
+                throw new Exception($"Error from Node: {response.Error}");
+        }
+
         public string GetFrontier(string account)
         {
             var response = _rpcClient.Frontiers(account, 1).Result;

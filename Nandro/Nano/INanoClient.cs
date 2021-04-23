@@ -7,6 +7,7 @@ namespace Nandro.Nano
     public interface INanoClient
     {
         AccountHistoryHistory GetLatestTransaction(string account);
+        AccountHistoryResponse GetLatestTransactions(string account, int count);
         string GetFrontier(string account);
         IDictionary<string, BigInteger> GetPendingTxs(string nanoAccount);
     }

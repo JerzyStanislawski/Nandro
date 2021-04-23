@@ -2,6 +2,7 @@
 using System;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Nandro
 {
@@ -10,31 +11,45 @@ namespace Nandro
         private Timer _timer;
         private HttpClient _httpClient;
         private SimpleClient _client;
+        private static readonly object _lockObject = new object();
 
-        private decimal _usdPrice;
-        private decimal _eurPrice;
+        public decimal UsdPrice { get; private set; }
+        public decimal EurPrice { get; private set; }
+        public bool UpToDate { get; private set; }
+        public bool Initialized => UsdPrice != 0 && EurPrice != 0;
 
         public PriceProvider()
         {
-            _timer = new Timer(new TimerCallback(GetNanoPrice), null, 0, 60 * 1000);
             _httpClient = new HttpClient();
             _client = new SimpleClient(_httpClient);
+            _timer = new Timer(new TimerCallback(state => GetNanoPrice(state)), null, 60 * 1000, 60 * 1000);
+        }
+
+        public void Initialize()
+        {
+            GetNanoPrice(null);
         }
 
         public decimal UsdToNano(decimal usdAmount)
         {
-            if (_usdPrice == 0)
-                throw new InvalidOperationException("USD price not initialized");
+            lock (_lockObject)
+            {
+                if (UsdPrice == 0)
+                    throw new InvalidOperationException("USD price not initialized");
 
-            return usdAmount / _usdPrice;
+                return usdAmount / UsdPrice;
+            }
         }
 
         public decimal EurToNano(decimal eurAmount)
         {
-            if (_eurPrice == 0)
-                throw new InvalidOperationException("USD price not initialized");
+            lock (_lockObject)
+            {
+                if (EurPrice == 0)
+                    throw new InvalidOperationException("EUR price not initialized");
 
-            return eurAmount / _eurPrice;
+                return eurAmount / EurPrice;
+            }
         }
 
         private void GetNanoPrice(object _)
@@ -43,11 +58,16 @@ namespace Nandro
             {
                 var result = _client.GetSimplePrice(new[] { "nano" }, new[] { "usd", "eur" }).Result;
 
-                _usdPrice = result["nano"]["usd"].Value;
-                _eurPrice = result["nano"]["eur"].Value;
+                lock (_lockObject)
+                {
+                    UsdPrice = result["nano"]["usd"].Value;
+                    EurPrice = result["nano"]["eur"].Value;
+                }
+                UpToDate = true;
             }
             catch
             {
+                UpToDate = false;
             }
         }
 
