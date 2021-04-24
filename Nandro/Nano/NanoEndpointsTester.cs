@@ -29,21 +29,30 @@ namespace Nandro.Nano
             }
         }
 
-        //public State TestState(Configuration config)
-        //{
-        //    var state = new State();
-        //    if (config.OwnNode)
-        //    {
-        //        if (!string.IsNullOrEmpty(config.NodeUri))
-        //            state.OwnNodeApi = TestNode(config.NodeUri);
-        //        if (!string.IsNullOrEmpty(config.NodeSocketUri))
-        //            state.OwnNodeSocket = TestSocket(config.NodeSocketUri);
-        //    }
-        //    state.PublicNodeSocket = TestSocket(config.PublicNanoSocketUri);
-        //    state.PublicNodeApi = TestNode(config.PublicNanoApiUri);
+        public EndpointTestResult TestState(Configuration config)
+        {
+            if (config.OwnNode)
+            {
+                if (!string.IsNullOrEmpty(config.NodeSocketUri))
+                {
+                    if (TestSocket(config.NodeSocketUri, out _))
+                        return EndpointTestResult.Success;
+                }
+                    
+                if (!string.IsNullOrEmpty(config.NodeUri))
+                {
+                    if (TestNode(config.NodeUri, out _))
+                        return EndpointTestResult.Success;
+                }
+            }
+            if (TestSocket(config.PublicNanoSocketUri, out _))
+                return EndpointTestResult.Success;
 
-        //    return state;
-        //}
+            if (TestNode(config.PublicNanoApiUri, out _))
+                return EndpointTestResult.Success;
+
+            return EndpointTestResult.Fail;
+        }
     }
 
     public enum EndpointTestResult

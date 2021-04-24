@@ -30,10 +30,14 @@ namespace Nandro.ViewModels
         public string NfcDeviceName { get; private set; }
         public bool NfcDeviceConnected => NfcDeviceName != null;
 
+        public EndpointTestResult ConnectionState { get; private set; }
+        public string ConnectionStateDescription { get; private set; }
+
         private Configuration _config;
         private PriceProvider _priceProvider;
         private Timer _priceTimer;
         private Timer _transactionsTimer;
+        private Timer _stateTimer;
 
         public MainWindowViewModel()
         {
@@ -50,6 +54,7 @@ namespace Nandro.ViewModels
                 .ContinueWith(task => _priceTimer = new Timer(state => DisplayPrice(state), null, 0, 60 * 1000));
 
             _transactionsTimer = new Timer(state => UpdateLatestTransactions(), null, 0, 60 * 1000);
+            _stateTimer = new Timer(state => CheckConnections(), null, 0, 60 * 1000);
 
             InitNFCMonitor();
         }
@@ -106,6 +111,18 @@ namespace Nandro.ViewModels
             Task.Run(() => UpdateLatestTransactions());
         }
 
+        private void CheckConnections()
+        {
+            var tester = Locator.Current.GetService<NanoEndpointsTester>();
+            ConnectionState = tester.TestState(_config);
+            ConnectionStateDescription = ConnectionState == EndpointTestResult.Success ? "Online" : "Offline";
+
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                this.RaisePropertyChanged(nameof(ConnectionState));
+                this.RaisePropertyChanged(nameof(ConnectionStateDescription));
+            });
+        }
     }
 
     public class TransactionEntry

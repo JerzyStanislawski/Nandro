@@ -2,12 +2,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rxui="http://reactiveui.net"
         xmlns:vm="using:Nandro.ViewModels"
+        xmlns:local="using:Nandro" 
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Nandro.Views.MainWindow"
         Icon="/Assets/nanoIcon.png"
         Title="Nandro">
+
+  <Window.Resources>
+    <local:TestResultToColorConverter x:Key="testResultToColorConverter"/>
+  </Window.Resources>
   
   <Grid>
     <Grid.RowDefinitions>
@@ -46,6 +51,7 @@
         <TextBlock Text="{Binding NfcDeviceName}" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
         -->
       </StackPanel>
+      <TextBlock Text="{Binding ConnectionStateDescription}" Foreground="{Binding ConnectionState, Converter={StaticResource testResultToColorConverter}}" Margin="15,15,0,1"/>
     </StackPanel>
     <rxui:RoutedViewHost Grid.Row="0" Grid.Column="1" Router="{Binding Router}" />
 
