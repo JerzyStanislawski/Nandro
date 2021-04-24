@@ -1,7 +1,6 @@
 ﻿using Nandro.Nano;
 using ReactiveUI;
 using System;
-using System.Diagnostics;
 using System.Reactive;
 
 namespace Nandro.ViewModels
@@ -19,13 +18,15 @@ namespace Nandro.ViewModels
         public ReactiveCommand<Unit, IRoutableViewModel> Home => ReactiveCommand.CreateFromObservable(() => HostScreen.Router.NavigateAndReset.Execute(new HomeViewModel(HostScreen, true)));
         public ReactiveCommand<Unit, IRoutableViewModel> NewTransaction { get; }
 
-        private readonly string _blockHashOrAccount;
+        private readonly string _blockHash;
+        private readonly string _nanoAccount;
         private readonly bool _success;
 
-        public TransactionResultViewModel(IScreen screen, string blockHashOrAccount, bool success)
+        public TransactionResultViewModel(IScreen screen, string blockHash, string nanoAccount, bool success)
         {
             HostScreen = screen;
-            _blockHashOrAccount = blockHashOrAccount;
+            _nanoAccount = nanoAccount;
+            _blockHash = blockHash;
             _success = success;
 
             Bitmap = new Avalonia.Media.Imaging.Bitmap(success ? ".\\Assets\\success.png" : ".\\Assets\\fail.png");
@@ -36,15 +37,15 @@ namespace Nandro.ViewModels
             NanoExplorerButtonText = success ? "Transaction detais" : "Account history";
 
             if (success)
-                ((MainWindowViewModel)screen).UpdateLatestTransactions();
+                ((MainWindowViewModel)screen).UpdateView();
         }
 
         private void ViewInExplorer()
         {
             if (_success)
-                Tools.ViewTransaction(_blockHashOrAccount);
+                Tools.ViewTransaction(_blockHash);
             else
-                Tools.ViewAccountHistory(_blockHashOrAccount);
+                Tools.ViewAccountHistory(_nanoAccount);
         }
     }
 }

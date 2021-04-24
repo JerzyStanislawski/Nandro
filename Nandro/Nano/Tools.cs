@@ -50,6 +50,9 @@ namespace Nandro.Nano
 
         internal static string ShortenAccount(string nanoAccount)
         {
+            if (String.IsNullOrEmpty(nanoAccount))
+                return String.Empty;
+
             return $"{nanoAccount.Substring(0, 13)}...{nanoAccount.Substring(nanoAccount.Length - 8)}";
         }
 

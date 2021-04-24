@@ -20,7 +20,8 @@
     </Grid.ColumnDefinitions>
     <StackPanel Grid.Row="0" Grid.Column="0" Margin="15,15,15,15">
       <TextBlock Text="{Binding NanoUsdPrice}" />
-      <TextBlock Text="{Binding NanoEurPrice}" />      
+      <TextBlock Text="{Binding NanoEurPrice}" />
+      <StackPanel IsVisible="{Binding AccountProvided}">
       <TextBlock Text="Latest transactions" Margin="0,15,0,15"/>
       <Button Content="{Binding Account}" Command="{Binding ViewAccount}"
                       Foreground="Blue" Background="Transparent" />
@@ -36,6 +37,14 @@
         </DataTemplate>
         </ItemsRepeater.ItemTemplate>
       </ItemsRepeater>
+      </StackPanel>
+      <StackPanel>
+        <TextBlock Text="NFC state"/>
+        <TextBlock Text="Disconnected" Foreground="Red" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNull}}"/>
+        <Image Source="/Assets/nfc.png" Height="30" Width="30" HorizontalAlignment="Left" 
+               IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+        <TextBlock Text="{Binding NfcDeviceName}" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+      </StackPanel>
     </StackPanel>
     <rxui:RoutedViewHost Grid.Row="0" Grid.Column="1" Router="{Binding Router}" />
 

@@ -42,6 +42,9 @@
     <AvaloniaResource Update="Assets\nanoLogo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
+    <AvaloniaResource Update="Assets\nfc.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Views\PaymentView.axaml.cs">

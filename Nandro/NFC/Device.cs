@@ -2,7 +2,6 @@
 using PCSC;
 using PCSC.Iso7816;
 using System;
-using System.Text;
 
 namespace Nandro.NFC
 {

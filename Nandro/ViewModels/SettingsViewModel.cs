@@ -44,7 +44,7 @@ namespace Nandro.ViewModels
         private Configuration _config;
 
         public ReactiveCommand<Unit, Unit> GoBack => HostScreen.Router.NavigateBack;
-        public CombinedReactiveCommand<Unit, Unit> Save => ReactiveCommand.CreateCombined(new[] { ReactiveCommand.Create(Persist), HostScreen.Router.NavigateBack }, canExecute: this.IsValid());
+        public CombinedReactiveCommand<Unit, Unit> Save => ReactiveCommand.CreateCombined(new[] { ReactiveCommand.Create(Persist), ReactiveCommand.Create(UpdateMainScreen), HostScreen.Router.NavigateBack }, canExecute: this.IsValid());
 
         public ReactiveCommand<Unit, Unit> TestNodeUri => ReactiveCommand.Create(TestNode);
         public ReactiveCommand<Unit, Unit> TestSocketUri => ReactiveCommand.Create(TestSocket);
@@ -125,6 +125,11 @@ namespace Nandro.ViewModels
                 }
             });
             //.ContinueWith(task => Dispatcher.UIThread.InvokeAsync())
+        }
+
+        private void UpdateMainScreen()
+        {
+            ((MainWindowViewModel)HostScreen).UpdateView();
         }
     }
 }

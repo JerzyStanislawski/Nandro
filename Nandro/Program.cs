@@ -7,6 +7,7 @@ using Nandro.ViewModels;
 using Nandro.Views;
 using ReactiveUI;
 using Splat;
+using System;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Nandro.Tests")]
@@ -27,6 +28,16 @@ namespace Nandro
 
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
+        {
+            RegisterServices();
+
+            return AppBuilder.Configure<App>()
+                .UsePlatformDetect()
+                .LogToTrace()
+                .UseReactiveUI();
+        }
+
+        private static void RegisterServices()
         {
             var config = Configuration.Load();
 
@@ -56,10 +67,7 @@ namespace Nandro
                 }
             });
 
-            return AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .LogToTrace()
-                .UseReactiveUI();
+            Locator.CurrentMutable.RegisterLazySingleton(() => new NFCMonitor(new DeviceMonitor()));
         }
     }
 }

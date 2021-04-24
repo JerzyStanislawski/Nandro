@@ -1,6 +1,7 @@
 using Avalonia.Threading;
 using DotNano.Shared.DataTypes;
 using Nandro.Nano;
+using Nandro.NFC;
 using ReactiveUI;
 using Splat;
 using System;
@@ -21,9 +22,13 @@ namespace Nandro.ViewModels
         public string NanoEurPrice { get; private set; } = "1 NANO = ??? EUR";
         public List<TransactionEntry> LatestTransactions { get; private set; }
         public string Account => Tools.ShortenAccount(_config.NanoAccount);
+        public bool AccountProvided => !String.IsNullOrEmpty(_config.NanoAccount);
 
         public ReactiveCommand<Unit, Unit> ViewAccount => ReactiveCommand.Create(() => Tools.ViewAccountHistory(_config.NanoAccount));
         public ReactiveCommand<string, Unit> ViewTransactionBlock => ReactiveCommand.Create<string>(Tools.ViewTransaction);
+
+        public string NfcDeviceName { get; private set; }
+        public bool NfcDeviceConnected => NfcDeviceName != null;
 
         private Configuration _config;
         private PriceProvider _priceProvider;
@@ -45,6 +50,31 @@ namespace Nandro.ViewModels
                 .ContinueWith(task => _priceTimer = new Timer(state => DisplayPrice(state), null, 0, 60 * 1000));
 
             _transactionsTimer = new Timer(state => UpdateLatestTransactions(), null, 0, 60 * 1000);
+
+            InitNFCMonitor();
+        }
+
+        private void InitNFCMonitor()
+        {
+            var nfcMonitor = Locator.Current.GetService<NFCMonitor>();
+            var device = nfcMonitor.DetectDevice();
+
+            if (device != null)
+                NfcDeviceName = device.Name;
+
+            nfcMonitor.DeviceStatusChanged += NfcMonitor_DeviceStatusChanged;
+            nfcMonitor.Start();
+        }
+
+        private void NfcMonitor_DeviceStatusChanged(object sender, DeviceEventArgs e)
+        {
+            if (e.Device == null)
+                NfcDeviceName = null;
+            else
+                NfcDeviceName = e.Device.Name;
+
+            this.RaisePropertyChanged(nameof(NfcDeviceName));
+            this.RaisePropertyChanged(nameof(NfcDeviceConnected));
         }
 
         private void DisplayPrice(object _)
@@ -66,6 +96,14 @@ namespace Nandro.ViewModels
                 LatestTransactions = transactions.History.Select(x => new TransactionEntry(x.Hash, x.Amount, x.Type, DateTimeOffset.FromUnixTimeSeconds(x.LocalTimestamp).UtcDateTime)).ToList();
                 Dispatcher.UIThread.InvokeAsync(() => this.RaisePropertyChanged(nameof(LatestTransactions)));
             }
+        }
+
+        public void UpdateView()
+        {
+            this.RaisePropertyChanged(nameof(Account));
+            this.RaisePropertyChanged(nameof(AccountProvided));
+
+            Task.Run(() => UpdateLatestTransactions());
         }
 
     }

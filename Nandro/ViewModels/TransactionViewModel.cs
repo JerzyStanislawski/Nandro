@@ -20,7 +20,8 @@ namespace Nandro.ViewModels
         public IScreen HostScreen { get; }
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
 
-        public CombinedReactiveCommand<Unit, Unit> GoBack => ReactiveCommand.CreateCombined(new[] { ReactiveCommand.Create(Leave), HostScreen.Router.NavigateBack });
+        public CombinedReactiveCommand<Unit, Unit> GoBack => ReactiveCommand.CreateCombined(
+            new[] { ReactiveCommand.Create(Leave), HostScreen.Router.NavigateBack });
 
         public Avalonia.Media.Imaging.Bitmap Bitmap { get; set; }
 
@@ -43,13 +44,8 @@ namespace Nandro.ViewModels
             {
                 using var transactionMonitor = Locator.Current.GetService<TransactionMonitor>();
                 var result = transactionMonitor.Verify(nanoAccount, amount, out var blockHash, _cancellation);
-                //Thread.Sleep(5000);
-
-                if (result)
-                {
-                    Dispatcher.UIThread.InvokeAsync(() => HostScreen.Router.Navigate.Execute(new TransactionResultViewModel(HostScreen, blockHash, true)));
-                }
-                _timer.Stop();
+                
+                MoveForward(blockHash, result);
             });
 
             Config = Locator.Current.GetService<Configuration>();
@@ -66,8 +62,7 @@ namespace Nandro.ViewModels
 
                 if (time <= TimeSpan.Zero)
                 {
-                    _timer.Stop();
-                    Dispatcher.UIThread.InvokeAsync(() => HostScreen.Router.Navigate.Execute(new TransactionResultViewModel(HostScreen, _nanoAccount, false)));
+                    MoveForward(null, false);
                 }
                 time = time.Add(TimeSpan.FromSeconds(-1));
             });
@@ -103,5 +98,11 @@ namespace Nandro.ViewModels
             }
         }
 
+        private void MoveForward(string blockHash, bool success)
+        {
+            _timer.Stop();
+            Dispatcher.UIThread.InvokeAsync(() => HostScreen.Router.Navigate.Execute(
+                new TransactionResultViewModel(HostScreen, blockHash, _nanoAccount, success)));
+        }
     }
 }

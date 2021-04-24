@@ -16,6 +16,9 @@ namespace Nandro
             var ts = new TimeSpan(DateTime.UtcNow.Ticks - time.Ticks);
             double delta = Math.Abs(ts.TotalSeconds);
 
+            if (delta < 0)
+                return "moments ago";
+
             if (delta < 1 * MINUTE)
                 return ts.Seconds == 1 ? "one second ago" : ts.Seconds + " seconds ago";
 
