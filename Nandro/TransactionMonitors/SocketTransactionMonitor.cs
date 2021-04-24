@@ -18,7 +18,7 @@ namespace Nandro.TransactionMonitors
 
         public bool Prepare(string nanoAccount, string uri)
         {
-            return _socket.Subscribe(uri, nanoAccount);
+            return _socket.Subscribe(uri, nanoAccount, out _);
         }
 
         public bool Verify(string nanoAccount, BigInteger raw, CancellationTokenSource cancellationTokenSource, out string blockHash)

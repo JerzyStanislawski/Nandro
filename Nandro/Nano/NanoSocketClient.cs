@@ -16,7 +16,7 @@ namespace Nandro.Nano
             _config = config;
         }
 
-        public bool Subscribe(string url, string nanoAddress)
+        public bool Subscribe(string url, string nanoAddress, out string error)
         {
             try
             {
@@ -27,10 +27,12 @@ namespace Nandro.Nano
 
                 var result = Receive<NanoAckResponse>(10, CancellationToken.None);
 
+                error = String.Empty;
                 return result?.Ack == "subscribe";
             }
-            catch
+            catch (Exception ex)
             {
+                error = ex.Message;
                 return false;
             }
         }

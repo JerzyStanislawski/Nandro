@@ -8,11 +8,14 @@ namespace Nandro.NFC
     class Device : IDisposable
     {
         private ICardReader _reader;
-        public string Name => _reader.Name;
+        private readonly CardMonitor _cardMonitor;
 
-        public Device(ICardReader reader)
+        public string Name { get; }
+
+        public Device(CardMonitor cardMonitor, string name)
         {
-            _reader = reader;
+            _cardMonitor = cardMonitor;
+            Name = name;
         }
 
         public void Transmit(string nanoUri)
@@ -142,7 +145,7 @@ namespace Nandro.NFC
 
         public void Dispose()
         {
-            _reader.Dispose();
+            _reader?.Dispose();
         }
     }
 }

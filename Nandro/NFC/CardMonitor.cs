@@ -47,12 +47,6 @@ namespace Nandro.NFC
 
         private void Connect(string readerName)
         {
-            var nanoAccount = "nano_3wm37qz19zhei7nzscjcopbrbnnachs4p1gnwo5oroi3qonw6inwgoeuufdp";
-            var amount = BigInteger.Parse("100000000000000000000000000");
-
-            var reader = _context.ConnectReader(readerName, SCardShareMode.Shared, SCardProtocol.Any);
-            using var device = new Device(reader);
-            device.Transmit($"nano:{nanoAccount}?amount={amount}");
         }
 
         public void Dispose()

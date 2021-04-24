@@ -67,7 +67,7 @@ namespace Nandro
                 }
             });
 
-            Locator.CurrentMutable.RegisterLazySingleton(() => new NFCMonitor(new DeviceMonitor()));
+            Locator.CurrentMutable.RegisterLazySingleton(() => new NFCMonitor());
         }
     }
 }

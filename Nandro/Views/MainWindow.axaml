@@ -39,11 +39,12 @@
       </ItemsRepeater>
       </StackPanel>
       <StackPanel>
-        <TextBlock Text="NFC state"/>
-        <TextBlock Text="Disconnected" Foreground="Red" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNull}}"/>
-        <Image Source="/Assets/nfc.png" Height="30" Width="30" HorizontalAlignment="Left" 
+        <TextBlock Text="No NFC Device" Foreground="Red" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNull}}"/>
+        <Image Source="/Assets/nfc.png" Height="30" Width="30" HorizontalAlignment="Left" ToolTip.Tip="{Binding NfcDeviceName}"
                IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+        <!--
         <TextBlock Text="{Binding NfcDeviceName}" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+        -->
       </StackPanel>
     </StackPanel>
     <rxui:RoutedViewHost Grid.Row="0" Grid.Column="1" Router="{Binding Router}" />

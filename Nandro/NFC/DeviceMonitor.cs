@@ -27,7 +27,7 @@ namespace Nandro.NFC
                 DeviceAttached.Invoke(sender, new DeviceAttachedEventArgs { DeviceName = e.AttachedReaders.First() });
 
             if (e.DetachedReaders.Any())
-                DeviceDetached.Invoke(sender, new DeviceDetachedEventArgs { DeviceName = e.AttachedReaders.First() });
+                DeviceDetached.Invoke(sender, new DeviceDetachedEventArgs { DeviceName = e.DetachedReaders.First() });
         }
 
         public void Dispose()

@@ -35,10 +35,35 @@ namespace Nandro.ViewModels
             set => _nodeSocketUri = this.RaiseAndSetIfChanged(ref _nodeSocketUri, value);
         }
         private bool _ownNode;
-        public bool OwnNode 
-        { 
-            get => _ownNode; 
+        public bool OwnNode
+        {
+            get => _ownNode;
             set => _ownNode = this.RaiseAndSetIfChanged(ref _ownNode, value);
+        }
+
+        private string _socketTestResultDescription;
+        public string SocketTestResultDescription
+        {
+            get => _socketTestResultDescription;
+            private set => this.RaiseAndSetIfChanged(ref _socketTestResultDescription, value);
+        }
+        private string _rpcTestResultDescription;
+        public string RpcTestResultDescription
+        {
+            get => _rpcTestResultDescription;
+            private set => this.RaiseAndSetIfChanged(ref _rpcTestResultDescription, value);
+        }
+        private EndpointTestResult _socketTestResult;
+        public EndpointTestResult SocketTestResult 
+        { 
+            get => _socketTestResult;
+            private set => this.RaiseAndSetIfChanged(ref _socketTestResult, value); 
+        }
+        private EndpointTestResult _rpcTestResult;
+        public EndpointTestResult RpcTestResult
+        {
+            get => _rpcTestResult;
+            private set => this.RaiseAndSetIfChanged(ref _rpcTestResult, value);
         }
 
         private Configuration _config;
@@ -99,16 +124,27 @@ namespace Nandro.ViewModels
             using var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(30));
 
+            SocketTestResultDescription = "Testing socket...";
+            SocketTestResult = EndpointTestResult.Pending;
+
             Task.Run(() =>
             {
                 if (!String.IsNullOrEmpty(NodeSocketUri))
                 {
                     var tester = Locator.Current.GetService<NanoEndpointsTester>();
-                    return tester.TestSocket(NodeSocketUri);
+                    return tester.TestSocket(NodeSocketUri, out _socketTestResultDescription);
                 }
                 return false;
-            });
-            //.ContinueWith(task => Dispatcher.UIThread.InvokeAsync())
+            }, cancellationTokenSource.Token)
+            .ContinueWith(task => Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                SocketTestResult = task.IsCompletedSuccessfully && task.Result ? EndpointTestResult.Success : EndpointTestResult.Fail;
+
+                if (task.IsCompletedSuccessfully && task.Result)
+                    SocketTestResultDescription = "Socket connection successful";
+                else
+                    this.RaisePropertyChanged(nameof(SocketTestResultDescription));
+            }));
         }
 
         private void TestNode()
@@ -116,15 +152,27 @@ namespace Nandro.ViewModels
             using var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(30));
 
+            RpcTestResultDescription = "Testing connection...";
+            RpcTestResult = EndpointTestResult.Pending;
+
             Task.Run(() =>
             {
                 if (!String.IsNullOrEmpty(NodeUri))
                 {
                     var tester = Locator.Current.GetService<NanoEndpointsTester>();
-                    tester.TestNode(NodeUri);
+                    return tester.TestNode(NodeUri, out _rpcTestResultDescription);
                 }
-            });
-            //.ContinueWith(task => Dispatcher.UIThread.InvokeAsync())
+                return false;
+            }, cancellationTokenSource.Token)
+            .ContinueWith(task => Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                RpcTestResult = task.IsCompletedSuccessfully && task.Result ? EndpointTestResult.Success : EndpointTestResult.Fail;
+
+                if (task.IsCompletedSuccessfully && task.Result)
+                    RpcTestResultDescription = "Node RPC test successful";
+                else
+                    this.RaisePropertyChanged(nameof(RpcTestResultDescription));
+            }));
         }
 
         private void UpdateMainScreen()
