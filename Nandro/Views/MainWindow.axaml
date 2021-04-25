@@ -23,36 +23,43 @@
       <ColumnDefinition Width="275"/>
       <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
-    <StackPanel Grid.Row="0" Grid.Column="0" Margin="15,15,15,15">
-      <TextBlock Text="{Binding NanoUsdPrice}" />
-      <TextBlock Text="{Binding NanoEurPrice}" />
-      <StackPanel IsVisible="{Binding AccountProvided}">
-      <TextBlock Text="Latest transactions" Margin="0,15,0,15"/>
-      <Button Content="{Binding Account}" Command="{Binding ViewAccount}"
-                      Foreground="Blue" Background="Transparent" />
-      <ItemsRepeater Items="{Binding LatestTransactions}">
-        <ItemsRepeater.ItemTemplate>
-        <DataTemplate DataType="vm:TransactionEntry">
-            <StackPanel Orientation="Horizontal">
-              <TextBlock Text="{Binding Type}" Width="60"/>
-              <Button Content="{Binding AmountText}" Command="{Binding $parent[Window].DataContext.ViewTransactionBlock}" CommandParameter="{Binding Hash}"
-                      Foreground="Blue" Background="Transparent" Width="75" />
-              <TextBlock Text="{Binding RelativeTime}"  Width="100"/>
-            </StackPanel>
-        </DataTemplate>
-        </ItemsRepeater.ItemTemplate>
-      </ItemsRepeater>
+    <Grid Grid.Row="0" Grid.Column="0" Margin="15,15,15,15">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="50" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="55" />
+      </Grid.RowDefinitions>
+      <StackPanel Grid.Row="0">
+        <TextBlock Text="{Binding NanoUsdPrice}" />
+        <TextBlock Text="{Binding NanoEurPrice}" />
       </StackPanel>
-      <StackPanel>
-        <TextBlock Text="No NFC Device" Foreground="Red" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNull}}"/>
-        <Image Source="/Assets/nfc.png" Height="30" Width="30" HorizontalAlignment="Left" ToolTip.Tip="{Binding NfcDeviceName}"
+      <StackPanel IsVisible="{Binding AccountProvided}" Grid.Row="1" VerticalAlignment="Center">
+        <TextBlock Text="Latest transactions" Margin="0,15,0,15"/>
+        <Button Content="{Binding Account}" Command="{Binding ViewAccount}"
+                        Foreground="Blue" Background="Transparent" Padding="0" BorderThickness="0"/>
+        <ItemsRepeater Items="{Binding LatestTransactions}">
+          <ItemsRepeater.ItemTemplate>
+          <DataTemplate DataType="vm:TransactionEntry">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Type}" Width="60"/>
+                <Button Content="{Binding AmountText}" Command="{Binding $parent[Window].DataContext.ViewTransactionBlock}" CommandParameter="{Binding Hash}"
+                        Foreground="Blue" Background="Transparent" BorderThickness="0" Padding="0" Width="75" />
+                <TextBlock Text="{Binding RelativeTime}"  Width="100"/>
+              </StackPanel>
+          </DataTemplate>
+          </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+      </StackPanel>
+      <Grid Grid.Row="2">
+        <Image Source="/Assets/nfc.png" Height="40" Width="40" HorizontalAlignment="Left" VerticalAlignment="Bottom" ToolTip.Tip="{Binding NfcDeviceName}"
                IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+        <TextBlock Text="No NFC Device" Foreground="Red" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNull}}"
+                   VerticalAlignment="Bottom"/>
         <!--
         <TextBlock Text="{Binding NfcDeviceName}" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
         -->
-      </StackPanel>
-      <TextBlock Text="{Binding ConnectionStateDescription}" Foreground="{Binding ConnectionState, Converter={StaticResource testResultToColorConverter}}" Margin="15,15,0,1"/>
-    </StackPanel>
+      </Grid>
+    </Grid>
     <rxui:RoutedViewHost Grid.Row="0" Grid.Column="1" Router="{Binding Router}" />
 
   </Grid>
