@@ -11,11 +11,15 @@ namespace Nandro.ViewModels
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
 
         public Avalonia.Media.Imaging.Bitmap Bitmap { get; set; }
-        public string NanoExplorerButtonText { get; set; }
+        public string ActionText { get; set; }
+        public string TransactionResultText { get; set; }
+        public bool Failed => !_success;
 
         public ReactiveCommand<Unit, Unit> OpenNanoExplorer => ReactiveCommand.Create(ViewInExplorer);
 
-        public ReactiveCommand<Unit, IRoutableViewModel> Home => ReactiveCommand.CreateFromObservable(() => HostScreen.Router.NavigateAndReset.Execute(new HomeViewModel(HostScreen, true)));
+        public CombinedReactiveCommand<Unit, Unit> Retry => ReactiveCommand.CreateCombined(
+            new[] { ReactiveCommand.Create(PrepareRetry), HostScreen.Router.NavigateBack });
+
         public ReactiveCommand<Unit, IRoutableViewModel> NewTransaction { get; }
 
         private readonly string _blockHash;
@@ -34,10 +38,11 @@ namespace Nandro.ViewModels
             NewTransaction = ReactiveCommand.CreateFromObservable(
                 () => HostScreen.Router.Navigate.Execute(new PaymentViewModel(HostScreen)));
 
-            NanoExplorerButtonText = success ? "Transaction detais" : "Account history";
+            TransactionResultText = success ? "Success! " : "Transaction not detected! ";
+            ActionText = success ? " to view transaction in explorer." : " to check account history.";
 
             if (success)
-                ((MainWindowViewModel)screen).UpdateView();
+                ((MainWindowViewModel)screen).UpdateAccountInfo();
         }
 
         private void ViewInExplorer()
@@ -46,6 +51,12 @@ namespace Nandro.ViewModels
                 Tools.ViewTransaction(_blockHash);
             else
                 Tools.ViewAccountHistory(_nanoAccount);
+        }
+
+        private void PrepareRetry()
+        {
+            var transactionVm = HostScreen.Router.FindViewModelInStack<TransactionViewModel>();
+            transactionVm?.Initialize();
         }
     }
 }

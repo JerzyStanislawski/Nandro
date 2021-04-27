@@ -6,17 +6,16 @@
              x:Class="Nandro.Views.PaymentView">
   <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
     <StackPanel Orientation="Horizontal">
-      <RadioButton GroupName="Currency" IsChecked="{Binding IsUsdChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}">USD</RadioButton>
-      <RadioButton GroupName="Currency" IsChecked="{Binding IsEurChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}">EUR</RadioButton>
-      <RadioButton GroupName="Currency" IsChecked="{Binding IsNanoChecked}" Command="{Binding Check}">NANO</RadioButton>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsUsdChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}" Margin="0,0,10,0">USD</RadioButton>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsEurChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}" Margin="10,0,10,0">EUR</RadioButton>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsNanoChecked}" Command="{Binding Check}"  Margin="10,0,10,0">NANO</RadioButton>
     </StackPanel>
-    <TextBox x:Name="AmountTextBox" Text="{Binding Amount, Mode=TwoWay}" />
-    <TextBlock Text="{Binding NanoAmountText}" IsVisible="{Binding IsFiatVisible}" />
+    <StackPanel Orientation="Horizontal" Width="550" Margin="0,10,0,0">
+      <TextBox x:Name="AmountTextBox" Text="{Binding Amount}" Name="AmountTextBox" Watermark="Amount" Width="350"/>
+      <TextBlock Text="{Binding NanoAmountText}" IsVisible="{Binding IsFiatVisible}" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,0"/>
+    </StackPanel>
     <TextBox Text="{Binding NanoAccount}" Watermark="Nano account" Margin="0,15,0,15" />
     <TextBlock Text="{Binding WarningMessage}" Foreground="Red" Margin="0,15,0,15" />
-    <StackPanel Orientation="Horizontal">
-      <Button Content="Home" Command="{Binding Home}" />
-      <Button Content="Request" Command="{Binding Request}" />
-    </StackPanel>
+      <Button Content="Request" Command="{Binding Request}" HorizontalAlignment="Right"/>
   </StackPanel>
 </UserControl>

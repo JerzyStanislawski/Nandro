@@ -10,5 +10,7 @@ namespace Nandro.Nano
         AccountHistoryResponse GetLatestTransactions(string account, int count);
         string GetFrontier(string account);
         IDictionary<string, BigInteger> GetPendingTxs(string nanoAccount);
+        AccountBalanceResponse GetBalance(string account);
+        string GetRepresentative(string account);
     }
 }

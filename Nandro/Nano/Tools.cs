@@ -74,5 +74,18 @@ namespace Nandro.Nano
             var uri = $"https://nanolooker.com/account/{account}";
             Process.Start("explorer", uri);
         }
+
+        public static void ViewChart(string currency)
+        {
+            var uri = $"https://www.coingecko.com/en/coins/nano/{currency}#panel";
+            Process.Start("explorer", uri);
+        }
+
+        public static string Normalize(this decimal value)
+        {
+            var amount = value / 1.000000000000000000000000000000000m;
+            var text = amount.ToString();
+            return text.Length <= 12 ? text : $"{text.Substring(0, 12)}...";
+        }
     }
 }

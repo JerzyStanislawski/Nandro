@@ -106,7 +106,7 @@ namespace Nandro.ViewModels
                     this.RaisePropertyChanged(nameof(NanoAmount));
                 }
 
-                NanoAmountText = $"{NanoAmount} NANO";
+                NanoAmountText = $" = {NanoAmount.ToString("0.0000")} NANO";
                 this.RaisePropertyChanged(nameof(NanoAmountText));
             }
         }

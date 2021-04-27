@@ -68,6 +68,24 @@ namespace Nandro.Nano
                 throw new Exception($"Error from Node: {response.Error}");
         }
 
+        public AccountBalanceResponse GetBalance(string account)
+        {
+            var response = _rpcClient.AccountBalance(account).Result;
+            if (response.IsSuccessful)
+                return response;
+            else
+                throw new Exception($"Error from Node: {response.Error}");
+        }
+
+        public string GetRepresentative(string account)
+        {
+            var response = _rpcClient.AccountRepresentative(account).Result;
+            if (response.IsSuccessful)
+                return response.Representative?.Address;
+            else
+                throw new Exception($"Error from Node: {response.Error}");
+        }
+
         public void Dispose()
         {
             _rpcClient.Dispose();

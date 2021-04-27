@@ -8,7 +8,7 @@ namespace Nandro
 {
     class PriceProvider : IDisposable
     {
-        private Timer _timer;
+        private MinuteTimer _timer;
         private HttpClient _httpClient;
         private SimpleClient _client;
         private static readonly object _lockObject = new object();
@@ -22,12 +22,12 @@ namespace Nandro
         {
             _httpClient = new HttpClient();
             _client = new SimpleClient(_httpClient);
-            _timer = new Timer(new TimerCallback(state => GetNanoPrice(state)), null, 60 * 1000, 60 * 1000);
+            _timer = new MinuteTimer(GetNanoPrice, false);
         }
 
         public void Initialize()
         {
-            GetNanoPrice(null);
+            GetNanoPrice();
         }
 
         public decimal UsdToNano(decimal usdAmount)
@@ -52,7 +52,7 @@ namespace Nandro
             }
         }
 
-        private void GetNanoPrice(object _)
+        private void GetNanoPrice()
         {
             try
             {

@@ -17,6 +17,9 @@ namespace Nandro.Views
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+
+            var amountTextBox = this.Find<TextBox>("AmountTextBox");
+            amountTextBox.AttachedToVisualTree += (_, _) => amountTextBox.Focus();
         }
     }
 }

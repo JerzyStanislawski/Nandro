@@ -2,7 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rxui="http://reactiveui.net"
         xmlns:vm="using:Nandro.ViewModels"
-        xmlns:local="using:Nandro" 
+        xmlns:nano="using:Nandro.Nano"
+        xmlns:local="using:Nandro"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -13,54 +14,101 @@
   <Window.Resources>
     <local:TestResultToColorConverter x:Key="testResultToColorConverter"/>
   </Window.Resources>
-  
-  <Grid>
+
+  <Grid Background="White">
     <Grid.RowDefinitions>
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="275"/>
+      <ColumnDefinition Width="340"/>
       <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
-    <Grid Grid.Row="0" Grid.Column="0" Margin="15,15,15,15">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="50" />
-        <RowDefinition Height="*" />
-        <RowDefinition Height="55" />
-      </Grid.RowDefinitions>
-      <StackPanel Grid.Row="0">
-        <TextBlock Text="{Binding NanoUsdPrice}" />
-        <TextBlock Text="{Binding NanoEurPrice}" />
-      </StackPanel>
-      <StackPanel IsVisible="{Binding AccountProvided}" Grid.Row="1" VerticalAlignment="Center">
-        <TextBlock Text="Latest transactions" Margin="0,15,0,15"/>
-        <Button Content="{Binding Account}" Command="{Binding ViewAccount}"
-                        Foreground="Blue" Background="Transparent" Padding="0" BorderThickness="0"/>
-        <ItemsRepeater Items="{Binding LatestTransactions}">
-          <ItemsRepeater.ItemTemplate>
-          <DataTemplate DataType="vm:TransactionEntry">
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding Type}" Width="60"/>
-                <Button Content="{Binding AmountText}" Command="{Binding $parent[Window].DataContext.ViewTransactionBlock}" CommandParameter="{Binding Hash}"
-                        Foreground="Blue" Background="Transparent" BorderThickness="0" Padding="0" Width="75" />
-                <TextBlock Text="{Binding RelativeTime}"  Width="100"/>
-              </StackPanel>
-          </DataTemplate>
-          </ItemsRepeater.ItemTemplate>
-        </ItemsRepeater>
-      </StackPanel>
-      <Grid Grid.Row="2">
-        <Image Source="/Assets/nfc.png" Height="40" Width="40" HorizontalAlignment="Left" VerticalAlignment="Bottom" ToolTip.Tip="{Binding NfcDeviceName}"
-               IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
-        <TextBlock Text="No NFC Device" Foreground="Red" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNull}}"
-                   VerticalAlignment="Bottom"/>
+    <StackPanel Grid.Row="0" Grid.Column="0">
+      <StackPanel.Background>
+        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+          <GradientStop Color="#AAAAAA" Offset="0.0" />
+          <GradientStop Color="White" Offset="1.0" />
+        </LinearGradientBrush>
+      </StackPanel.Background>
+      <Expander IsExpanded="True" ExpandDirection="Down"  Margin="0,30,0,10">
+        <Expander.Header>
+          <TextBlock Text="Prices" TextAlignment="Center" FontSize="14" FontWeight="Bold" />
+        </Expander.Header>
+        <Expander.Content>
+          <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="37,0,0,0">
+              <TextBlock Text="{Binding NanoUsdPrice}" TextAlignment="Center" FontSize="18" Margin="0,5,10,1" />
+              <Button Content="USD chart" Command="{Binding ViewUsdChart}" Classes="Flat" Foreground="Blue" Padding="0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="37,0,0,0">
+              <TextBlock Text="{Binding NanoEurPrice}" TextAlignment="Center" FontSize="18" Margin="0,1,10,1" />
+              <Button Content="EUR chart" Command="{Binding ViewEurChart}" Classes="Flat" Foreground="Blue" Padding="0"/>
+            </StackPanel>
+          </StackPanel>
+        </Expander.Content>
+      </Expander>
+      <Expander IsVisible="{Binding AccountInfo, Converter={x:Static ObjectConverters.IsNotNull}}" IsExpanded="True" ExpandDirection="Down" Margin="0,0,0,10">
+        <Expander.Header>
+          <TextBlock Text="Account info" TextAlignment="Center" FontSize="14" FontWeight="Bold" />
+        </Expander.Header>
+        <Expander.Content>
+          <Grid VerticalAlignment="Center" Margin="32,1,10,10">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="2*"/>
+              <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Account: " Grid.Row="0" Grid.Column="0" FontSize="14" FontWeight="SemiBold" Margin="5,1,5,1" />
+            <Button Content="{Binding AccountShortened}" Command="{Binding ViewAccount}" CommandParameter="{Binding AccountInfo.Account}" Grid.Row="0" Grid.Column="1" Classes="Flat" Foreground="Blue" Padding="0" Margin="5,1,5,1" HorizontalAlignment="Left"/>
+            <TextBlock Text="Representative: " Grid.Row="1" Grid.Column="0" FontSize="14" FontWeight="SemiBold" Margin="5,1,5,1" />
+            <Button Content="{Binding RepresentativeShortened}" Command="{Binding ViewAccount}" CommandParameter="{Binding AccountInfo.Representative}" Grid.Row="1" Grid.Column="1" Classes="Flat" Foreground="Blue" Padding="0" Margin="5,1,5,1" HorizontalAlignment="Left"/>
+            <TextBlock Text="Balance: " Grid.Row="2" Grid.Column="0" FontSize="14" FontWeight="SemiBold" Margin="5,1,5,1" />
+            <TextBlock Text="{Binding BalanceText}" Grid.Row="2" Grid.Column="1" FontSize="14" FontWeight="SemiBold" Margin="5,1,5,1" />
+            <TextBlock Text="Pending: " Grid.Row="3" Grid.Column="0" FontSize="14" FontWeight="SemiBold" Margin="5,1,5,1" />
+            <TextBlock Text="{Binding PendingText}" Grid.Row="3" Grid.Column="1" FontSize="14" FontWeight="SemiBold" Margin="5,1,5,1" />
+          </Grid>
+        </Expander.Content>
+      </Expander>
+      <Expander IsVisible="{Binding AccountInfo, Converter={x:Static ObjectConverters.IsNotNull}}" IsExpanded="True" ExpandDirection="Down" Margin="0,0,0,10">
+        <Expander.Header>
+          <TextBlock Text="Latest Transactions" TextAlignment="Center" FontSize="14" FontWeight="Bold" />
+        </Expander.Header>
+        <Expander.Content>
+          <StackPanel VerticalAlignment="Center" Margin="37,1,10,10">           
+            <ItemsRepeater Items="{Binding LatestTransactions}">
+              <ItemsRepeater.ItemTemplate>
+                <DataTemplate DataType="nano:TransactionEntry">
+                  <StackPanel Orientation="Horizontal" Margin="0,2,0,2" >
+                    <TextBlock Text="{Binding Type}" Width="70" FontWeight="SemiBold" FontSize="14"/>
+                    <Button Content="{Binding AmountText}" Command="{Binding $parent[Window].DataContext.ViewTransactionBlock}" CommandParameter="{Binding Hash}"
+                             Classes="Flat" Foreground="Blue" Padding="0" Width="100"/>
+                    <TextBlock Text="{Binding RelativeTime}"  Width="100" TextAlignment="Right" FontWeight="SemiBold" FontSize="14"/>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+          </StackPanel>
+        </Expander.Content>
+      </Expander>
+    </StackPanel>
+      <Grid Margin="10,0,10,0">
+        <StackPanel Orientation="Horizontal">
+          <Button Content="Home" Command="{Binding Home}" Classes="Flat" Foreground="Blue" Padding="0" HorizontalAlignment="Left" Margin="5,0,5,10" VerticalAlignment="Bottom"/>
+          <Image Source="/Assets/nfc.png" Height="40" Width="40" HorizontalAlignment="Left" VerticalAlignment="Bottom" ToolTip.Tip="{Binding NfcDeviceName}"
+                 IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+          <TextBlock Text="No NFC Device" Foreground="Red" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNull}}" Margin="5,0,5,10"
+                     VerticalAlignment="Bottom"/>
+        </StackPanel>
         <!--
         <TextBlock Text="{Binding NfcDeviceName}" IsVisible="{Binding NfcDeviceName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
         -->
       </Grid>
-    </Grid>
     <rxui:RoutedViewHost Grid.Row="0" Grid.Column="1" Router="{Binding Router}" />
-
   </Grid>
 </Window>

@@ -5,6 +5,7 @@ using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
 using Splat;
 using System;
+using System.Diagnostics;
 using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,6 +74,7 @@ namespace Nandro.ViewModels
 
         public ReactiveCommand<Unit, Unit> TestNodeUri => ReactiveCommand.Create(TestNode);
         public ReactiveCommand<Unit, Unit> TestSocketUri => ReactiveCommand.Create(TestSocket);
+        public ReactiveCommand<string, Unit> GoToLink => ReactiveCommand.Create<string>(uri => Process.Start("explorer", uri));
 
         public SettingsViewModel(IScreen hostScreen)
         {
@@ -177,7 +179,7 @@ namespace Nandro.ViewModels
 
         private void UpdateMainScreen()
         {
-            ((MainWindowViewModel)HostScreen).UpdateView();
+            ((MainWindowViewModel)HostScreen).UpdateAccountInfo();
         }
     }
 }

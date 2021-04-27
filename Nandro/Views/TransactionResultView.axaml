@@ -4,14 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Nandro.Views.TransactionResultView">
-  <StackPanel HorizontalAlignment="Center"
-            VerticalAlignment="Center">
-    <Image Source="{Binding Bitmap}" Width="256" Height="256"></Image>
-    <TextBlock Text="{Binding BlockUrl}"></TextBlock>
-    <Button Content="{Binding NanoExplorerButtonText}" Command="{Binding OpenNanoExplorer}" />
-    <StackPanel Orientation="Horizontal">
-      <Button Content="Home" Command="{Binding Home}" />
-      <Button Content="Request payment" Command="{Binding NewTransaction}" />      
+  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Image Source="{Binding Bitmap}" Width="256" Height="256"/>
+    <StackPanel Orientation="Horizontal" Margin="10,40,10,40">
+      <TextBlock Text="{Binding TransactionResultText}" FontSize="16" FontWeight="SemiBold"/>
+      <Button Content="Click here" Command="{Binding OpenNanoExplorer}" Classes="Flat" Padding="0" Foreground="Blue"/>
+      <TextBlock Text="{Binding ActionText}" FontSize="16" FontWeight="SemiBold"/>
+    </StackPanel>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+      <Button Content="Retry" Command="{Binding Retry}" IsVisible="{Binding Failed}" Width="120" Margin="0,0,20,0"/>
+      <Button Content="New payment" Command="{Binding NewTransaction}" Width="120"/>      
     </StackPanel>
   </StackPanel>
 </UserControl>

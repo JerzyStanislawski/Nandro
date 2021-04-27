@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>disable</Nullable>
+    <StartupObject>Nandro.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -27,7 +28,6 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0" />
     <PackageReference Include="CoinGeckoAsyncApi" Version="1.4.1" />
     <PackageReference Include="DotNano.RpcApi" Version="0.5.0" />
-    <PackageReference Include="Iot.Device.Bindings" Version="1.4.0" />
     <PackageReference Include="Material.Avalonia" Version="2.1.0" />
     <PackageReference Include="NdefLibrary" Version="4.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
@@ -37,6 +37,9 @@
     <PackageReference Include="ReactiveUI.Validation" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Update="Assets\coins.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
     <AvaloniaResource Update="Assets\nanoIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
@@ -45,6 +48,9 @@
     </AvaloniaResource>
     <AvaloniaResource Update="Assets\nfc.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\settings.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
   </ItemGroup>
   <ItemGroup>

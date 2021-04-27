@@ -27,28 +27,40 @@ namespace Nandro.ViewModels
 
         public Configuration Config { get; }
         public string CountDown { get; set; }
+        public int Progress { get; set; }
 
-        private CancellationTokenSource _cancellation = new CancellationTokenSource();
+        private CancellationTokenSource _cancellation;
 
         DispatcherTimer _timer;
         private readonly string _nanoAccount;
+        private readonly BigInteger _amount;
 
         public TransactionViewModel(IScreen screen, string nanoAccount, BigInteger amount)
         {
             HostScreen = screen;
             _nanoAccount = nanoAccount;
+            _amount = amount;
+
+            Config = Locator.Current.GetService<Configuration>();
 
             DisplayQR(nanoAccount, amount);
 
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            _cancellation = new CancellationTokenSource();
             Task.Run(() =>
             {
                 using var transactionMonitor = Locator.Current.GetService<TransactionMonitor>();
-                var result = transactionMonitor.Verify(nanoAccount, amount, out var blockHash, _cancellation);
-                
-                MoveForward(blockHash, result);
-            });
+                var result = transactionMonitor.Verify(_nanoAccount, _amount, out var blockHash, _cancellation);
 
-            Config = Locator.Current.GetService<Configuration>();
+                if (!_cancellation.IsCancellationRequested)
+                    MoveForward(blockHash, result);
+            }, _cancellation.Token);
+
+            Progress = 100;
             StartTimer();
         }
 
@@ -65,6 +77,9 @@ namespace Nandro.ViewModels
                     MoveForward(null, false);
                 }
                 time = time.Add(TimeSpan.FromSeconds(-1));
+
+                Progress = (int)time.TotalSeconds * 100 / Config.TransactionTimeoutSec;
+                this.RaisePropertyChanged(nameof(Progress));
             });
 
             _timer.Start();
@@ -86,7 +101,7 @@ namespace Nandro.ViewModels
             Bitmap = new Avalonia.Media.Imaging.Bitmap(memoryStream);
         }
 
-        private void Leave()
+        public void Leave()
         {
             try
             {

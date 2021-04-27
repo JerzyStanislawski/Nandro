@@ -2,17 +2,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="clr-namespace:Material.Styles;assembly=Material.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Nandro.Views.HomeView">
-  <StackPanel  HorizontalAlignment="Center"
-               VerticalAlignment="Center" >
-    <Image Source="/Assets/nanoLogo.png" Width="256" Height="256"/>
-    <Button Content="Request payment" Command="{Binding RequestPayment}"            
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center" 
-               Width="135"/>
-    <Button Content="Settings" Command="{Binding Settings}"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Width="135" /></StackPanel>
+
+  <UserControl.Background>
+    <ImageBrush Source="/Assets/nanoLogo.png" Opacity="0.15" BitmapInterpolationMode="LowQuality"/>
+  </UserControl.Background>
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+    <!--<Image Source="/Assets/nanoLogo.png" Width="256" Height="256"/>-->
+    <Button Command="{Binding RequestPayment}" Grid.Column="0" Width="160" Height="190">
+      <Button.Content>
+        <StackPanel>
+          <Image Source="/Assets/coins.png" Width="128" Height="128"/>
+          <Separator Background="Black" />
+          <TextBlock Text="Request Payment" FontWeight="Bold" FontSize="14" Margin="10,5,10,5" HorizontalAlignment="Center" TextAlignment="Center"/>
+        </StackPanel>
+      </Button.Content>
+    </Button>
+    <Button Content="Settings" Command="{Binding Settings}" Grid.Column="1" Width="160" Height="190">
+      <Button.Content>
+        <StackPanel>
+          <Image Source="/Assets/settings.png" Width="128" Height="128"/>
+          <Separator Background="Black" />
+          <TextBlock Text="Settings" FontWeight="Bold" FontSize="14" Margin="10,5,10,5" HorizontalAlignment="Center" TextAlignment="Center"/>
+        </StackPanel>
+      </Button.Content>
+    </Button>
+  </Grid>
 </UserControl>
