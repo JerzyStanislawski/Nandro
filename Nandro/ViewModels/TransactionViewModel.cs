@@ -106,7 +106,9 @@ namespace Nandro.ViewModels
             try
             {
                 _timer.Stop();
-                _cancellation.Cancel();
+
+                if (!_cancellation.IsCancellationRequested)
+                    _cancellation?.Cancel();
             }
             catch
             {
