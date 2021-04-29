@@ -8,31 +8,39 @@ namespace Nandro.NFC
     {
         private ISCardContext _context;
 
-        private readonly DeviceMonitor _deviceMonitor;
-        private readonly CardMonitor _cardMonitor;
+        private DeviceMonitor _deviceMonitor;
+        private CardMonitor _cardMonitor;
         private Device _device;
+        private bool _initialized;
 
         public event EventHandler<DeviceEventArgs> DeviceStatusChanged;
 
-        public NFCMonitor()
-        {
-            var contextFactory = ContextFactory.Instance;
-            _context = contextFactory.Establish(SCardScope.System);
-
-            _cardMonitor = new CardMonitor(_context);
-
-            _deviceMonitor = new DeviceMonitor();
-            _deviceMonitor.DeviceAttached += DeviceAttached;
-            _deviceMonitor.DeviceDetached += DeviceDetached;
-        }
-
         public void Start()
         {
-            _deviceMonitor.Start();
+            try
+            {
+                var contextFactory = ContextFactory.Instance;
+                _context = contextFactory.Establish(SCardScope.System);
+
+                _cardMonitor = new CardMonitor(_context);
+
+                _deviceMonitor = new DeviceMonitor();
+                _deviceMonitor.DeviceAttached += DeviceAttached;
+                _deviceMonitor.DeviceDetached += DeviceDetached;
+                _deviceMonitor.Start();
+
+                _initialized = true;
+            }
+            catch
+            {
+            }
         }
 
         public Device DetectDevice()
         {
+            if (!_initialized)
+                return null;
+
             var readerNames = _context.GetReaders();
 
             if (readerNames.Any())
@@ -65,7 +73,7 @@ namespace Nandro.NFC
 
         public void Dispose()
         {
-            _context.Dispose();
+            _context?.Dispose();
         }
     }
 }
