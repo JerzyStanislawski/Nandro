@@ -94,11 +94,35 @@ namespace Nandro.NFC
                 var ndefSendCommand = BuildNdefCommand(nanoUriNdef, offset);
                 response = SendPseudoApdu(ndefSendCommand);
 
+                Beep();
+
                 return true;
             }
             catch (Exception)
             {
                 return false;
+            }
+        }
+
+        private void Beep()
+        {
+            var receiveBuffer = new byte[2];
+            var apdu = new CommandApdu(IsoCase.Case3Short, _reader.Protocol)
+            {
+                CLA = 0xFF,
+                INS = 0x00,
+                P1 = 0x40,
+                P2 = 0xA0,
+                Data = new byte[] { 0x05, 0x00, 0x01, 0x01 }
+            };
+            var arr = apdu.ToArray();
+
+            try
+            {
+                var bytesReceived = _reader.Control(new IntPtr(3225264), arr, arr.Length, receiveBuffer, 2);
+            }
+            catch (Exception ex)
+            {
             }
         }
 
