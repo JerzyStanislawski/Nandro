@@ -39,7 +39,7 @@ namespace Nandro.Nano
         [JsonPropertyName("ack")]
         public string Ack { get; set; }
         [JsonPropertyName("time")]
-        public long Time { get; set; }
+        public string Time { get; set; }
         [JsonPropertyName("id")]
         public string Id;
     }

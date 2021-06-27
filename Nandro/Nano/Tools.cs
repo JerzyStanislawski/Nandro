@@ -87,5 +87,10 @@ namespace Nandro.Nano
             var text = amount.ToString();
             return text.Length <= 12 ? text : $"{text.Substring(0, 12)}...";
         }
+
+        internal static string GenerateNanoUri(string nanoAccount, BigInteger amount)
+        {
+            return $"nano:{nanoAccount}?amount={amount}";
+        }
     }
 }

@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nandro", "Nandro\Nandro.csproj", "{62082C35-9D4F-4505-991E-EBC48C0C35F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nandro.Tests", "Nandro.Tests\Nandro.Tests.csproj", "{BA308EDF-82E8-4284-82EF-CA4C62F87FA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nandro.Tests", "Nandro.Tests\Nandro.Tests.csproj", "{BA308EDF-82E8-4284-82EF-CA4C62F87FA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

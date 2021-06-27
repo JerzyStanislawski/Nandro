@@ -67,13 +67,13 @@ namespace Nandro.ViewModels
         private void InitNFCMonitor()
         {
             var nfcMonitor = Locator.Current.GetService<NFCMonitor>();
-            var device = nfcMonitor.DetectDevice();
-
-            if (device != null)
-                NfcDeviceName = device.Name;
 
             nfcMonitor.DeviceStatusChanged += NfcMonitor_DeviceStatusChanged;
             nfcMonitor.Start();
+
+            var device = nfcMonitor.DetectDevice();
+            if (device != null)
+                NfcDeviceName = device.Name;
         }
 
         private void NfcMonitor_DeviceStatusChanged(object sender, DeviceEventArgs e)

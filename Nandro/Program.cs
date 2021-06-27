@@ -5,6 +5,7 @@ using Nandro.NFC;
 using Nandro.TransactionMonitors;
 using Nandro.ViewModels;
 using Nandro.Views;
+using NdefLibrary.Ndef;
 using ReactiveUI;
 using Splat;
 using System;
@@ -20,9 +21,6 @@ namespace Nandro
         // yet and stuff might break.
         public static void Main(string[] args)
         {
-            //var context = PCSC.ContextFactory.Instance.Establish(PCSC.SCardScope.System);
-            //new CardMonitor(context).Start(context.GetReaders()[0]);
-
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 

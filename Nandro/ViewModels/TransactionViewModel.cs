@@ -1,5 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Threading;
+using Nandro.Nano;
+using Nandro.NFC;
 using Nandro.TransactionMonitors;
 using QRCoder;
 using ReactiveUI;
@@ -26,10 +28,13 @@ namespace Nandro.ViewModels
         public Avalonia.Media.Imaging.Bitmap Bitmap { get; set; }
 
         public Configuration Config { get; }
+        private NFCMonitor _nfcMonitor;
+
         public string CountDown { get; set; }
         public int Progress { get; set; }
 
-        private CancellationTokenSource _cancellation;
+        private CancellationTokenSource _verificationCancellation;
+        private CancellationTokenSource _nfcCancellation;
 
         DispatcherTimer _timer;
         private readonly string _nanoAccount;
@@ -42,6 +47,7 @@ namespace Nandro.ViewModels
             _amount = amount;
 
             Config = Locator.Current.GetService<Configuration>();
+            _nfcMonitor = Locator.Current.GetService<NFCMonitor>();
 
             DisplayQR(nanoAccount, amount);
 
@@ -50,15 +56,20 @@ namespace Nandro.ViewModels
 
         public void Initialize()
         {
-            _cancellation = new CancellationTokenSource();
+            _verificationCancellation = new CancellationTokenSource();
+            _nfcCancellation = new CancellationTokenSource();
+
+            Task.Run(() => _nfcMonitor.Device?.Transmit(_nanoAccount, _amount, _nfcCancellation.Token), _nfcCancellation.Token);
             Task.Run(() =>
             {
                 using var transactionMonitor = Locator.Current.GetService<TransactionMonitor>();
-                var result = transactionMonitor.Verify(_nanoAccount, _amount, out var blockHash, _cancellation);
+                var result = transactionMonitor.Verify(_nanoAccount, _amount, out var blockHash, _verificationCancellation);
 
-                if (!_cancellation.IsCancellationRequested)
+                if (!_verificationCancellation.IsCancellationRequested)
+                {
                     MoveForward(blockHash, result);
-            }, _cancellation.Token);
+                }
+            }, _verificationCancellation.Token);
 
             Progress = 100;
             StartTimer();
@@ -87,7 +98,7 @@ namespace Nandro.ViewModels
 
         private void DisplayQR(string nanoAccount, BigInteger amount)
         {
-            var data = $"nano:{nanoAccount}?amount={amount}";
+            var data = Tools.GenerateNanoUri(nanoAccount, amount);
 
             using var qrGenerator = new QRCodeGenerator();
             var qrData = qrGenerator.CreateQrCode(Encoding.UTF8.GetBytes(data), QRCodeGenerator.ECCLevel.H);
@@ -107,8 +118,10 @@ namespace Nandro.ViewModels
             {
                 _timer.Stop();
 
-                if (!_cancellation.IsCancellationRequested)
-                    _cancellation?.Cancel();
+                if (!_verificationCancellation.IsCancellationRequested)
+                    _verificationCancellation?.Cancel();
+                if (!_nfcCancellation.IsCancellationRequested)
+                    _nfcCancellation?.Cancel();
             }
             catch
             {
@@ -118,6 +131,8 @@ namespace Nandro.ViewModels
         private void MoveForward(string blockHash, bool success)
         {
             _timer.Stop();
+            _nfcCancellation.Cancel();
+
             Dispatcher.UIThread.InvokeAsync(() => HostScreen.Router.Navigate.Execute(
                 new TransactionResultViewModel(HostScreen, blockHash, _nanoAccount, success)));
         }

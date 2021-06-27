@@ -9,20 +9,17 @@ namespace Nandro.NFC
         private ISCardContext _context;
 
         private DeviceMonitor _deviceMonitor;
-        private CardMonitor _cardMonitor;
         private Device _device;
         private bool _initialized;
 
         public event EventHandler<DeviceEventArgs> DeviceStatusChanged;
+        public Device Device => _device;
 
         public void Start()
         {
             try
             {
-                var contextFactory = ContextFactory.Instance;
-                _context = contextFactory.Establish(SCardScope.System);
-
-                _cardMonitor = new CardMonitor(_context);
+                _context = ContextFactory.Instance.Establish(SCardScope.System);
 
                 _deviceMonitor = new DeviceMonitor();
                 _deviceMonitor.DeviceAttached += DeviceAttached;
@@ -45,8 +42,14 @@ namespace Nandro.NFC
 
             if (readerNames.Any())
             {
-                _device = new Device(_cardMonitor, readerNames[0]);
-                return _device;
+                try
+                {
+                    _device = new Device(readerNames[0], _context.ConnectReader(readerNames[0], SCardShareMode.Direct, SCardProtocol.Unset));
+                    return _device;
+                }
+                catch (Exception)
+                {
+                }
             }
 
             return null;
@@ -54,21 +57,32 @@ namespace Nandro.NFC
 
         private void DeviceDetached(object sender, DeviceDetachedEventArgs e)
         {
-            if (e.DeviceName == _device.Name)
+            try
             {
-                _device.Dispose();
-                _device = null;
-                DeviceStatusChanged.Invoke(this, new DeviceEventArgs(_device));
+                if (e.DeviceName == _device.Name)
+                {
+                    _device.Dispose();
+                    _device = null;
+                    DeviceStatusChanged.Invoke(this, new DeviceEventArgs(_device));
+                }
+            }
+            catch (Exception)
+            {
             }
         }
 
         private void DeviceAttached(object sender, DeviceAttachedEventArgs e)
         {
-            if (_device != null)
-                _device.Dispose();
+            try
+            {
+                _device?.Dispose();
 
-            _device = new Device(_cardMonitor, e.DeviceName);
-            DeviceStatusChanged.Invoke(this, new DeviceEventArgs(_device));
+                _device = new Device(e.DeviceName, _context.ConnectReader(e.DeviceName, SCardShareMode.Direct, SCardProtocol.Unset));
+                DeviceStatusChanged.Invoke(this, new DeviceEventArgs(_device));
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         public void Dispose()
