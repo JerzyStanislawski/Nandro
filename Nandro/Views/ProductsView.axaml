@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Nandro.ViewModels;assembly=Nandro"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Nandro.Views.ProductsView">
+
+  <Design.DataContext>
+    <vm:ProductsViewModel/>
+  </Design.DataContext>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+      <DataGrid Items="{Binding Products}" Margin="10" AlternatingRowBackground="Azure" x:Name="DataGrid">        
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Name"
+                              Binding="{Binding Name}"
+                              Width="4*"/>
+          <DataGridTextColumn Header="Price"
+                              Binding="{Binding Price}"
+                              Width="*"/>
+          <DataGridTemplateColumn Header="Unit" Width="*">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <ComboBox Items="{Binding Path=DataContext.Units, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                         SelectedItem="{Binding Unit}"/>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+        </DataGrid.Columns>
+      </DataGrid>
+      <Button Content="Add" Command="{Binding Add}" Grid.Row="1" HorizontalAlignment="Left" Margin="10"/>
+    <Button Content="Save" Command="{Binding Save}" Grid.Row="2" HorizontalAlignment="Right" Margin="10"/>
+  </Grid>
+  
+</UserControl>

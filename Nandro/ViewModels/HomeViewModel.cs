@@ -12,6 +12,7 @@ namespace Nandro.ViewModels
 
         public ReactiveCommand<Unit, IRoutableViewModel> RequestPayment { get; private set; }
         public ReactiveCommand<Unit, IRoutableViewModel> Settings { get; private set; }
+        public ReactiveCommand<Unit, IRoutableViewModel> Products { get; private set; }
 
         public HomeViewModel(IScreen hostScreen, bool enableRequests)
         {
@@ -19,6 +20,9 @@ namespace Nandro.ViewModels
 
             Settings = ReactiveCommand.CreateFromObservable(
                 () => HostScreen.Router.Navigate.Execute(new SettingsViewModel(HostScreen)));
+
+            Products = ReactiveCommand.CreateFromObservable(
+                () => HostScreen.Router.Navigate.Execute(new ProductsViewModel(HostScreen)));
 
             if (enableRequests)
                 EnableRequests();

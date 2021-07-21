@@ -3,13 +3,11 @@
              xmlns:local="using:Nandro"
              xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
              x:Class="Nandro.App">
-    <Application.DataTemplates>
-        <local:ViewLocator/>
-    </Application.DataTemplates>
   <Application.Resources>
     <themes:BundledTheme BaseTheme="Light" PrimaryColor="LightBlue" SecondaryColor="Blue" />
   </Application.Resources>
     <Application.Styles>
       <StyleInclude Source="avares://Material.Avalonia/Material.Avalonia.Templates.xaml" />
+      <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Default.xaml"/>
     </Application.Styles>
 </Application>

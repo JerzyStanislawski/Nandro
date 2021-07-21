@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
+using Nandro.Data;
 using Nandro.Nano;
 using Nandro.NFC;
 using Nandro.TransactionMonitors;
@@ -42,12 +43,15 @@ namespace Nandro
             Locator.CurrentMutable.RegisterConstant(config);
             Locator.CurrentMutable.Register(() => new HomeView(), typeof(IViewFor<HomeViewModel>));
             Locator.CurrentMutable.Register(() => new PaymentView(), typeof(IViewFor<PaymentViewModel>));
+            Locator.CurrentMutable.Register(() => new ProductsView(), typeof(IViewFor<ProductsViewModel>));
             Locator.CurrentMutable.Register(() => new SettingsView(), typeof(IViewFor<SettingsViewModel>));
             Locator.CurrentMutable.Register(() => new TransactionView(), typeof(IViewFor<TransactionViewModel>));
             Locator.CurrentMutable.Register(() => new TransactionResultView(), typeof(IViewFor<TransactionResultViewModel>));
 
             Locator.CurrentMutable.RegisterLazySingleton(() => new PriceProvider());
             Locator.CurrentMutable.RegisterLazySingleton(() => new NanoEndpointsTester());
+
+            Locator.CurrentMutable.RegisterLazySingleton(() => new NandroDbContext());
 
             var apiClient = string.IsNullOrEmpty(config.NodeUri) ? new NanoNodeClient(config.PublicNanoApiUri) : new NanoNodeClient(config.NodeUri);
             Locator.CurrentMutable.RegisterLazySingleton<INanoClient>(() => apiClient);
