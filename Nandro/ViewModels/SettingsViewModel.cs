@@ -1,4 +1,5 @@
 ﻿using Avalonia.Threading;
+using Nandro.Data;
 using Nandro.Nano;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
@@ -6,6 +7,7 @@ using ReactiveUI.Validation.Helpers;
 using Splat;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,6 +70,7 @@ namespace Nandro.ViewModels
         }
 
         private Configuration _config;
+        private NandroDbContext _dbContext;
 
         public ReactiveCommand<Unit, Unit> GoBack => HostScreen.Router.NavigateBack;
         public CombinedReactiveCommand<Unit, Unit> Save => ReactiveCommand.CreateCombined(new[] { ReactiveCommand.Create(Persist), ReactiveCommand.Create(UpdateMainScreen), HostScreen.Router.NavigateBack }, canExecute: this.IsValid());
@@ -94,7 +97,8 @@ namespace Nandro.ViewModels
 
         private void LoadConfig()
         {
-            _config = Locator.Current.GetService<Configuration>();
+            _dbContext = Locator.Current.GetService<NandroDbContext>();
+            _config = _dbContext.Configuration.Single();
 
             NanoAccount = _config.NanoAccount;
             NodeUri = _config.NodeUri;
@@ -118,7 +122,7 @@ namespace Nandro.ViewModels
                 _config.NodeSocketUri = String.Empty;
             }
 
-            _config.Persist();
+            _dbContext.SaveChanges();
         }
 
         private void TestSocket()

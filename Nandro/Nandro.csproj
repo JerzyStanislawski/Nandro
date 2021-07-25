@@ -63,6 +63,9 @@
     <AvaloniaResource Update="Assets\settings.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
+    <AvaloniaResource Update="Assets\waste.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Views\PaymentView.axaml.cs">
@@ -73,7 +76,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Update="config.json">
+    <None Update="nandro.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -10,6 +10,7 @@ using NdefLibrary.Ndef;
 using ReactiveUI;
 using Splat;
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Nandro.Tests")]
@@ -38,7 +39,8 @@ namespace Nandro
 
         private static void RegisterServices()
         {
-            var config = Configuration.Load();
+            var dbContext = new NandroDbContext();
+            var config = dbContext.Configuration.Single();
 
             Locator.CurrentMutable.RegisterConstant(config);
             Locator.CurrentMutable.Register(() => new HomeView(), typeof(IViewFor<HomeViewModel>));
@@ -51,7 +53,7 @@ namespace Nandro
             Locator.CurrentMutable.RegisterLazySingleton(() => new PriceProvider());
             Locator.CurrentMutable.RegisterLazySingleton(() => new NanoEndpointsTester());
 
-            Locator.CurrentMutable.RegisterLazySingleton(() => new NandroDbContext());
+            Locator.CurrentMutable.RegisterLazySingleton(() => dbContext);
 
             var apiClient = string.IsNullOrEmpty(config.NodeUri) ? new NanoNodeClient(config.PublicNanoApiUri) : new NanoNodeClient(config.NodeUri);
             Locator.CurrentMutable.RegisterLazySingleton<INanoClient>(() => apiClient);

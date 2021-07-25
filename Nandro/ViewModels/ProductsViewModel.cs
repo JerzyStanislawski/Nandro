@@ -21,6 +21,8 @@ namespace Nandro.ViewModels
         public ObservableCollection<string> Units { get; } = new ObservableCollection<string>(Enum.GetNames(typeof(ProductUnit)));
         public CombinedReactiveCommand<Unit, Unit> Save => ReactiveCommand.CreateCombined(new[] { ReactiveCommand.Create(Persist), HostScreen.Router.NavigateBack }, canExecute: Observable.Return(CanSave));
         public ReactiveCommand<Unit, Unit> Add => ReactiveCommand.Create(AddProduct);
+        public ReactiveCommand<Product, Unit> Remove => ReactiveCommand.Create<Product>(RemoveProduct);
+
         public bool CanSave { get; private set; }
 
         public ObservableCollection<Product> Products { get; }
@@ -43,18 +45,22 @@ namespace Nandro.ViewModels
         {
             Products.Add(new Product
             {
-                Id = Products.Max(x => x.Id) + 1,
                 Unit = ProductUnit.Piece
             });
             RaisePropertyChanged();
         }
 
-        private void Persist()
+        private void RemoveProduct(Product productToRemove)
         {
-            _dbContext.Products.RemoveRange(_dbContext.Products);
-            _dbContext.Products.AddRange(Products);
-            _dbContext.SaveChanges();
+            Products.Remove(productToRemove);
+            RaisePropertyChanged();
         }
 
+        private void Persist()
+        {
+            _dbContext.RemoveRange(_dbContext.Products.AsEnumerable().Where(x => !Products.Any(y => y.Id == x.Id)));
+            _dbContext.Products.AddRange(Products.Where(x => x.Id == 0));
+            _dbContext.SaveChanges();
+        }
     }
 }

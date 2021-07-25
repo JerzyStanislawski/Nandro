@@ -32,6 +32,19 @@
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
+          <DataGridTemplateColumn>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <Button Command="{Binding Path=DataContext.Remove, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                        CommandParameter="{Binding}"
+                        Background="Transparent">
+                  <Button.Content>
+                    <Image Source="/Assets/waste.png" Width="16" Height="16"/>
+                  </Button.Content>
+                </Button>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
         </DataGrid.Columns>
       </DataGrid>
       <Button Content="Add" Command="{Binding Add}" Grid.Row="1" HorizontalAlignment="Left" Margin="10"/>

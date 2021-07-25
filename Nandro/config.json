@@ -1,9 +1,0 @@
-{
-  "NanoAccount": "",
-  "NodeUri": "",
-  "NodeSocketUri": "",
-  "OwnNodeCheckbox": false,
-  "PublicNanoApiUri": "https://proxy.nanos.cc/proxy",
-  "PublicNanoSocketUri": "wss://socket.nanos.cc",
-  "TransactionTimeoutSec": 60
-}
