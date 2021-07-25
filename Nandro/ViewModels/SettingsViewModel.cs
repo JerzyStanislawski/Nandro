@@ -98,7 +98,7 @@ namespace Nandro.ViewModels
         private void LoadConfig()
         {
             _dbContext = Locator.Current.GetService<NandroDbContext>();
-            _config = _dbContext.Configuration.Single();
+            _config = Locator.Current.GetService<Configuration>();
 
             NanoAccount = _config.NanoAccount;
             NodeUri = _config.NodeUri;
@@ -122,6 +122,7 @@ namespace Nandro.ViewModels
                 _config.NodeSocketUri = String.Empty;
             }
 
+            //_dbContext.Configuration.Remove()
             _dbContext.SaveChanges();
         }
 
