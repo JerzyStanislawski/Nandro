@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Nandro.Models;
+using Nandro.Providers;
+using System.Linq;
 
 namespace Nandro.Data
 {
@@ -15,6 +17,19 @@ namespace Nandro.Data
         {
             DbPath = $".\\nandro.db";
             Database.EnsureCreated();
+
+            if (!Configuration.Any())
+            {
+                Configuration.Add(new Configuration
+                {
+                    PublicNanoApiUri = "https://proxy.nanos.cc/proxy",
+                    PublicNanoSocketUri = "wss://socket.nanos.cc",
+                    TransactionTimeoutSec = 60,
+                    CurrencyCode = PriceProvider.UsdCode
+                });
+
+                SaveChanges();
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

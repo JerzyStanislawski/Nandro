@@ -1,10 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Nandro.Data;
+﻿using Nandro.Data;
 using Nandro.Models;
 using ReactiveUI;
 using Splat;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
@@ -19,13 +17,21 @@ namespace Nandro.ViewModels
         public IScreen HostScreen { get; }
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
         public ObservableCollection<string> Units { get; } = new ObservableCollection<string>(Enum.GetNames(typeof(ProductUnit)));
-        public CombinedReactiveCommand<Unit, Unit> Save => ReactiveCommand.CreateCombined(new[] { ReactiveCommand.Create(Persist), HostScreen.Router.NavigateBack }, canExecute: Observable.Return(CanSave));
+        public CombinedReactiveCommand<Unit, Unit> Save => ReactiveCommand.CreateCombined(new[] { 
+            ReactiveCommand.Create(Persist),
+            ReactiveCommand.Create(RefreshHomeView),
+            HostScreen.Router.NavigateBack }, 
+            canExecute: Observable.Return(CanSave));
+
         public ReactiveCommand<Unit, Unit> Add => ReactiveCommand.Create(AddProduct);
         public ReactiveCommand<Product, Unit> Remove => ReactiveCommand.Create<Product>(RemoveProduct);
 
         public bool CanSave { get; private set; }
 
         public ObservableCollection<Product> Products { get; }
+        public string PriceString => $"Price [{_dbContext.Configuration.Single().CurrencyCode}]";
+
+        public EventHandler<ProductRowAddedEventArgs> ProductAdded;
 
         public ProductsViewModel(IScreen hostScreen)
         {
@@ -43,11 +49,19 @@ namespace Nandro.ViewModels
 
         private void AddProduct()
         {
-            Products.Add(new Product
+            var product = new Product
             {
                 Unit = ProductUnit.Piece
-            });
+            };
+            product.NameChanged += (_, _) => RaisePropertyChanged();
+
+            Products.Add(product);
             RaisePropertyChanged();
+
+            ProductAdded?.Invoke(this, new ProductRowAddedEventArgs
+            {
+                Product = product
+            });
         }
 
         private void RemoveProduct(Product productToRemove)
@@ -62,5 +76,16 @@ namespace Nandro.ViewModels
             _dbContext.Products.AddRange(Products.Where(x => x.Id == 0));
             _dbContext.SaveChanges();
         }
+
+        public void RefreshHomeView()
+        {
+            var homeViewModel = (HomeViewModel)HostScreen.Router.NavigationStack[0];
+            homeViewModel.EnableRequests();
+        }
+    }
+
+    public class ProductRowAddedEventArgs : EventArgs
+    {
+        public Product Product { get; set; }
     }
 }

@@ -37,13 +37,17 @@
         </Expander.Header>
         <Expander.Content>
           <StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="37,0,0,0">
-              <TextBlock Text="{Binding NanoUsdPrice}" TextAlignment="Center" FontSize="18" Margin="0,5,10,1" />
-              <Button Content="USD chart" Command="{Binding ViewUsdChart}" Classes="Flat" Foreground="Blue" Padding="0"/>
+            <StackPanel Orientation="Horizontal" Margin="37,0,0,0" IsVisible="{Binding CurrencyPriceVisible}">
+              <TextBlock Text="{Binding NanoCurrencyPrice}" TextAlignment="Left" FontSize="18" Margin="0,3,0,1" Width="100"/>
+              <Button Content="{Binding CurrencyChartName}" Command="{Binding ViewCurrencyChart}" Classes="Flat" Foreground="Blue" Padding="0" Width="80"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="37,0,0,0">
-              <TextBlock Text="{Binding NanoEurPrice}" TextAlignment="Center" FontSize="18" Margin="0,1,10,1" />
-              <Button Content="EUR chart" Command="{Binding ViewEurChart}" Classes="Flat" Foreground="Blue" Padding="0"/>
+              <TextBlock Text="{Binding NanoUsdPrice}" TextAlignment="Left" FontSize="18" Margin="0,3,0,1" Width="100"/>
+              <Button Content="USD chart" Command="{Binding ViewUsdChart}" Classes="Flat" Foreground="Blue" Padding="0" Width="80"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="37,0,0,0">
+              <TextBlock Text="{Binding NanoEurPrice}" TextAlignment="Left" FontSize="18" Margin="0,3,0,1" Width="100"/>
+              <Button Content="EUR chart" Command="{Binding ViewEurChart}" Classes="Flat" Foreground="Blue" Padding="0" Width="80"/>
             </StackPanel>
           </StackPanel>
         </Expander.Content>

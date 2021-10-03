@@ -65,6 +65,16 @@
         </StackPanel>
       </Expander.Content>
     </Expander>
+    <StackPanel Orientation="Horizontal">
+      <TextBlock Text="Default currency:" FontWeight="SemiBold" FontSize="14" Margin="0,12,5,5"/>
+      <ComboBox Items="{Binding Currencies}"
+                SelectedItem="{Binding Currency}"
+                Name="CurrencyComboBox"
+                Width="300"
+                Margin="20,5,0,5"/>      
+    </StackPanel>
+    <TextBlock Text="Changing currency causes products prices become out of date!" FontSize="14" FontWeight="DemiBold" Margin="10,0,0,0"
+               IsVisible="{Binding CurrencyWarningVisible}"/>
     <Button Content="Save" Command="{Binding Save}" HorizontalAlignment="Right"/>      
   </StackPanel>
 </UserControl>

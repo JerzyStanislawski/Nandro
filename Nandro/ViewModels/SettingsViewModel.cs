@@ -1,11 +1,14 @@
 ﻿using Avalonia.Threading;
 using Nandro.Data;
+using Nandro.Models;
 using Nandro.Nano;
+using Nandro.Providers;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
 using Splat;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
@@ -20,6 +23,7 @@ namespace Nandro.ViewModels
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
 
         string _nanoAccount;
+
         public string NanoAccount
         {
             get => _nanoAccount;
@@ -69,8 +73,30 @@ namespace Nandro.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _rpcTestResult, value);
         }
 
+        private IEnumerable<Currency> _currencies;
+        public IEnumerable<Currency> Currencies 
+        { 
+            get => _currencies;
+            private set => this.RaiseAndSetIfChanged(ref _currencies, value);
+        }
+
+        private Currency _currency;
+        public Currency Currency
+        {
+            get => _currency;
+            private set => this.RaiseAndSetIfChanged(ref _currency, value);
+        }
+
+        private bool _currencyWarningVisible;
+        public bool CurrencyWarningVisible
+        {
+            get => _currencyWarningVisible;
+            private set => this.RaiseAndSetIfChanged(ref _currencyWarningVisible, value);
+        }
+
         private Configuration _config;
         private NandroDbContext _dbContext;
+        private bool _productsExist;
 
         public ReactiveCommand<Unit, Unit> GoBack => HostScreen.Router.NavigateBack;
         public CombinedReactiveCommand<Unit, Unit> Save => ReactiveCommand.CreateCombined(new[] { ReactiveCommand.Create(Persist), ReactiveCommand.Create(UpdateMainScreen), HostScreen.Router.NavigateBack }, canExecute: this.IsValid());
@@ -104,12 +130,28 @@ namespace Nandro.ViewModels
             NodeUri = _config.NodeUri;
             NodeSocketUri = _config.NodeSocketUri;
             OwnNode = _config.OwnNode;
+
+            LoadCurrencies();
+        }
+
+        private void LoadCurrencies()
+        {
+            var currencyProvider = Locator.Current.GetService<CurrencyProvider>();
+            Currencies = currencyProvider.GetSupportedCurrencies();
+
+            if (!String.IsNullOrEmpty(_config.CurrencyCode))
+                Currency = Currencies.Single(x => x.Code == _config.CurrencyCode);
+            else
+                Currency = Currencies.First();
+
+            _productsExist = _dbContext.Products.Any();
         }
 
         private void Persist()
         {
             _config.NanoAccount = NanoAccount;
             _config.OwnNode = OwnNode;
+            _config.CurrencyCode = Currency?.Code;
 
             if (OwnNode)
             {
@@ -122,7 +164,6 @@ namespace Nandro.ViewModels
                 _config.NodeSocketUri = String.Empty;
             }
 
-            //_dbContext.Configuration.Remove()
             _dbContext.SaveChanges();
         }
 
@@ -184,7 +225,16 @@ namespace Nandro.ViewModels
 
         private void UpdateMainScreen()
         {
-            ((MainWindowViewModel)HostScreen).UpdateAccountInfo();
+            Locator.Current.GetService<PriceProvider>().Initialize();
+
+            var mainWindow = (MainWindowViewModel)HostScreen;
+            mainWindow.UpdateAccountInfo();
+            mainWindow.DisplayPrice();
+        }
+
+        public void UpdateCurrencyWarning()
+        {
+            CurrencyWarningVisible = _productsExist;
         }
     }
 }

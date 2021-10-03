@@ -10,6 +10,12 @@
     <vm:ProductsViewModel/>
   </Design.DataContext>
 
+  <UserControl.Styles>
+    <Style Selector="DataGridColumnHeader">
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+  </UserControl.Styles>
+
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
@@ -18,17 +24,36 @@
     </Grid.RowDefinitions>
       <DataGrid Items="{Binding Products}" Margin="10" AlternatingRowBackground="Azure" x:Name="DataGrid">        
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Name"
-                              Binding="{Binding Name}"
-                              Width="4*"/>
-          <DataGridTextColumn Header="Price"
-                              Binding="{Binding Price}"
-                              Width="*"/>
+          <DataGridTemplateColumn Header="Name" Width="4*">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBox HorizontalAlignment="Left"
+                         VerticalAlignment="Center"
+                         FontSize="16"
+                         FontWeight="DemiBold"
+                         Text="{Binding Name, Mode=TwoWay}" 
+                         Width="500"/>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTemplateColumn Header="Price" Width="*">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBox HorizontalAlignment="Center"
+                         VerticalAlignment="Center"                    
+                         FontSize="16"
+                         FontWeight="DemiBold"
+                         Text="{Binding Price}" 
+                         Width="100" 
+                         TextAlignment="Center"/>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>         
           <DataGridTemplateColumn Header="Unit" Width="*">
             <DataGridTemplateColumn.CellTemplate>
               <DataTemplate>
                 <ComboBox Items="{Binding Path=DataContext.Units, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                         SelectedItem="{Binding Unit}"/>
+                          SelectedItem="{Binding Unit}" />
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>

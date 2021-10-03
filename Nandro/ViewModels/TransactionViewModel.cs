@@ -40,6 +40,9 @@ namespace Nandro.ViewModels
         private readonly string _nanoAccount;
         private readonly BigInteger _amount;
 
+        public string NanoAccount => _nanoAccount;
+        public string AmountText => $"{Tools.ToNano(_amount).ToString("0.00")} NANO";
+
         public TransactionViewModel(IScreen screen, string nanoAccount, BigInteger amount)
         {
             HostScreen = screen;
@@ -59,11 +62,11 @@ namespace Nandro.ViewModels
             _verificationCancellation = new CancellationTokenSource();
             _nfcCancellation = new CancellationTokenSource();
 
-            Task.Run(() => _nfcMonitor.Device?.Transmit(_nanoAccount, _amount, _nfcCancellation.Token), _nfcCancellation.Token);
+            Task.Run(() => _nfcMonitor.Device?.Transmit(NanoAccount, _amount, _nfcCancellation.Token), _nfcCancellation.Token);
             Task.Run(() =>
             {
                 using var transactionMonitor = Locator.Current.GetService<TransactionMonitor>();
-                var result = transactionMonitor.Verify(_nanoAccount, _amount, out var blockHash, _verificationCancellation);
+                var result = transactionMonitor.Verify(NanoAccount, _amount, out var blockHash, _verificationCancellation);
 
                 if (!_verificationCancellation.IsCancellationRequested)
                 {
@@ -134,7 +137,7 @@ namespace Nandro.ViewModels
             _nfcCancellation.Cancel();
 
             Dispatcher.UIThread.InvokeAsync(() => HostScreen.Router.Navigate.Execute(
-                new TransactionResultViewModel(HostScreen, blockHash, _nanoAccount, success)));
+                new TransactionResultViewModel(HostScreen, blockHash, NanoAccount, success)));
         }
     }
 }

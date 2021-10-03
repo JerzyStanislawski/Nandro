@@ -6,9 +6,10 @@
              x:Class="Nandro.Views.PaymentView">
   <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
     <StackPanel Orientation="Horizontal">
-      <RadioButton GroupName="Currency" IsChecked="{Binding IsUsdChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}" Margin="0,0,10,0">USD</RadioButton>
-      <RadioButton GroupName="Currency" IsChecked="{Binding IsEurChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}" Margin="10,0,10,0">EUR</RadioButton>
-      <RadioButton GroupName="Currency" IsChecked="{Binding IsNanoChecked}" Command="{Binding Check}"  Margin="10,0,10,0">NANO</RadioButton>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsCurrencyChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}" IsVisible="{Binding IsCurrencyVisible}" Margin="0,0,10,0" Content="{Binding CurrencyName}"/>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsUsdChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}" Margin="0,0,10,0" Content="USD"/>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsEurChecked}" Command="{Binding Check}" IsEnabled="{Binding FiatEnabled}" Margin="10,0,10,0" Content="EUR"/>
+      <RadioButton GroupName="Currency" IsChecked="{Binding IsNanoChecked}" Command="{Binding Check}"  Margin="10,0,10,0" Content="NANO" />
     </StackPanel>
     <StackPanel Orientation="Horizontal" Width="550" Margin="0,10,0,0">
       <TextBox x:Name="AmountTextBox" Text="{Binding Amount}" Name="AmountTextBox" Watermark="Amount" Width="350"/>
@@ -16,6 +17,6 @@
     </StackPanel>
     <TextBox Text="{Binding NanoAccount}" Watermark="Nano account" Margin="0,15,0,15" />
     <TextBlock Text="{Binding WarningMessage}" Foreground="Red" Margin="0,15,0,15" />
-      <Button Content="Request" Command="{Binding Request}" HorizontalAlignment="Right"/>
+    <Button Content="Request" Command="{Binding Request}" HorizontalAlignment="Right"/>
   </StackPanel>
 </UserControl>

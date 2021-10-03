@@ -4,6 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>disable</Nullable>
     <StartupObject>Nandro.Program</StartupObject>
+    <Version>1.3.0</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -63,6 +64,9 @@
     <AvaloniaResource Update="Assets\settings.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
+    <AvaloniaResource Update="Assets\shopping-cart.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
     <AvaloniaResource Update="Assets\waste.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
@@ -76,6 +80,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Update="currencies.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="nandro.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

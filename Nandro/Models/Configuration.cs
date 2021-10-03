@@ -9,6 +9,7 @@
         public string PublicNanoApiUri { get; set; }
         public string PublicNanoSocketUri { get; set; }
         public bool OwnNode { get; set; }
+        public string CurrencyCode { get; set; }
         public int TransactionTimeoutSec { get; set; }
     }
 }

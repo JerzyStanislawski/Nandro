@@ -1,4 +1,5 @@
 ﻿using Nandro.Nano;
+using Nandro.Providers;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
@@ -28,10 +29,13 @@ namespace Nandro.ViewModels
         }
         public bool IsFiatVisible { get; private set; }
 
+        public bool IsCurrencyChecked { get; set; }
         public bool IsUsdChecked { get; set; }
         public bool IsEurChecked { get; set; }
         public bool IsNanoChecked { get; set; }
         public bool FiatEnabled { get; private set; } = true;
+        public bool IsCurrencyVisible { get; private set; }
+        public string CurrencyName{ get; private set; }
         public string WarningMessage { get; private set; }
 
         public ReactiveCommand<Unit, Unit> Check => ReactiveCommand.Create(CurrencyChecked);
@@ -40,7 +44,9 @@ namespace Nandro.ViewModels
         public ReactiveCommand<Unit, IRoutableViewModel> Request { get; }
 
         private PriceProvider _priceProvider;
+        private CurrencyProvider _currencyProvider;
         private decimal? _amount;
+        private Configuration _config;
         private string _nanoAccount;
 
         public PaymentViewModel(IScreen screen)
@@ -52,10 +58,11 @@ namespace Nandro.ViewModels
                 canExecute: this.IsValid());
 
             _priceProvider = Locator.Current.GetService<PriceProvider>();
-            EnsureState(_priceProvider);
+            _currencyProvider = Locator.Current.GetService<CurrencyProvider>();
+            Initialize();
 
-            var config = Locator.Current.GetService<Configuration>();
-            _nanoAccount = config.NanoAccount;
+            _config = Locator.Current.GetService<Configuration>();
+            _nanoAccount = _config.NanoAccount;
 
             this.WhenAnyValue(x => x.Amount)
                 .Throttle(TimeSpan.FromSeconds(.25))
@@ -65,10 +72,17 @@ namespace Nandro.ViewModels
             this.ValidationRule(vm => vm.Amount, amount => amount.HasValue && amount.Value > 0, "Invalid amount");
         }
 
-        private void EnsureState(PriceProvider priceProvider)
+        private void Initialize()
         {
-            if (priceProvider.Initialized)
-                IsUsdChecked = true;
+            IsCurrencyVisible = !_currencyProvider.IsDefaultCurrencyStandard;
+            CurrencyName = _currencyProvider.DefaultCurrency.Code;
+
+            if (_priceProvider.Initialized)
+            {
+                IsCurrencyChecked = IsCurrencyVisible;
+                IsUsdChecked = _currencyProvider.DefaultCurrency.Code == PriceProvider.UsdCode;
+                IsEurChecked = _currencyProvider.DefaultCurrency.Code == PriceProvider.EurCode;
+            }
             else
             {
                 IsNanoChecked = true;
@@ -76,7 +90,7 @@ namespace Nandro.ViewModels
                 WarningMessage = "Error retrieving Nano USD/EUR price.";
             }
 
-            if (!priceProvider.UpToDate)
+            if (!_priceProvider.UpToDate)
                 WarningMessage = "Nano price might not be up to date.";
 
             CurrencyChecked();
@@ -94,6 +108,12 @@ namespace Nandro.ViewModels
                 NanoAmount = Amount.Value;
             else
             {
+                if (IsCurrencyChecked)
+                {
+                    NanoAmount = _priceProvider.CurrencyToNano(Amount.Value);
+                    this.RaisePropertyChanged(nameof(NanoAmount));
+                }
+
                 if (IsUsdChecked)
                 {
                     NanoAmount = _priceProvider.UsdToNano(Amount.Value);

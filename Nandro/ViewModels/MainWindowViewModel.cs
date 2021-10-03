@@ -1,6 +1,8 @@
 using Avalonia.Threading;
+using Nandro.Models;
 using Nandro.Nano;
 using Nandro.NFC;
+using Nandro.Providers;
 using ReactiveUI;
 using Splat;
 using System;
@@ -15,8 +17,12 @@ namespace Nandro.ViewModels
     {
         public RoutingState Router { get; } = new RoutingState();
 
+        private Currency _currency;
+        public bool CurrencyPriceVisible { get; private set; }
+        public string NanoCurrencyPrice { get; private set; } = "???";
         public string NanoUsdPrice { get; private set; } = "$???";
-        public string NanoEurPrice { get; private set; } = "€???";
+        public string NanoEurPrice { get; private set; } = "??? €";
+        public string CurrencyChartName { get; private set; }
         public AccountInfo AccountInfo { get; private set; }
         public IEnumerable<TransactionEntry> LatestTransactions => AccountInfo?.LatestTransactions;
         public string BalanceText => $"{AccountInfo?.Balance.ToString("0.00")} NANO";
@@ -28,6 +34,7 @@ namespace Nandro.ViewModels
         public ReactiveCommand<string, Unit> ViewTransactionBlock => ReactiveCommand.Create<string>(Tools.ViewTransaction);
         public ReactiveCommand<Unit, Unit> ViewUsdChart => ReactiveCommand.Create(() => Tools.ViewChart("usd"));
         public ReactiveCommand<Unit, Unit> ViewEurChart => ReactiveCommand.Create(() => Tools.ViewChart("eur"));
+        public ReactiveCommand<Unit, Unit> ViewCurrencyChart => ReactiveCommand.Create(() => Tools.ViewChart(_currency.Code.ToLower()));
         public CombinedReactiveCommand<Unit, IObservable<IRoutableViewModel>> Home => ReactiveCommand.CreateCombined(new[] {
             ReactiveCommand.Create(BeforeHomeNav), ReactiveCommand.Create(() => Router.NavigateAndReset.Execute(new HomeViewModel(this, true))) });
 
@@ -39,9 +46,9 @@ namespace Nandro.ViewModels
 
         private Configuration _config;
         private PriceProvider _priceProvider;
+        private CurrencyProvider _currencyProvider;
         private MinuteTimer _priceTimer;
         private MinuteTimer _transactionsTimer;
-        private MinuteTimer _stateTimer;
 
         public MainWindowViewModel()
         {
@@ -53,13 +60,13 @@ namespace Nandro.ViewModels
 
             _config = Locator.Current.GetService<Configuration>();
             _priceProvider = Locator.Current.GetService<PriceProvider>();
+            _currencyProvider = Locator.Current.GetService<CurrencyProvider>();
             Task.Run(() => _priceProvider.Initialize(), cancellationTokenSource.Token)
                 .ContinueWith(task => Dispatcher.UIThread.InvokeAsync(() => homeViewModel.EnableRequests()))
                 .ContinueWith(task => _priceTimer = new MinuteTimer(DisplayPrice));
 
             Task.Run(() => UpdateAccountInfo());
             _transactionsTimer = new MinuteTimer(UpdateLatestTransactions, false);
-            //_stateTimer = new MinuteTimer(CheckConnections);
 
             InitNFCMonitor();
         }
@@ -87,12 +94,23 @@ namespace Nandro.ViewModels
             this.RaisePropertyChanged(nameof(NfcDeviceConnected));
         }
 
-        private void DisplayPrice()
+        public void DisplayPrice()
         {
+            _currency = _currencyProvider.DefaultCurrency;
+            CurrencyPriceVisible = !_currencyProvider.IsDefaultCurrencyStandard;
+            if (CurrencyPriceVisible)
+            {
+                NanoCurrencyPrice = $"{_priceProvider.CurrencyPrice} {_currency.Symbol}";
+                CurrencyChartName = $"{_currency.Code} chart";
+            }
+            this.RaisePropertyChanged(nameof(NanoCurrencyPrice));
+            this.RaisePropertyChanged(nameof(CurrencyChartName));
+            this.RaisePropertyChanged(nameof(CurrencyPriceVisible));
+
             NanoUsdPrice = $"${_priceProvider.UsdPrice.ToString("0.00")}";
             this.RaisePropertyChanged(nameof(NanoUsdPrice));
 
-            NanoEurPrice = $"€{_priceProvider.EurPrice.ToString("0.00")}";
+            NanoEurPrice = $"{_priceProvider.EurPrice.ToString("0.00")} €";
             this.RaisePropertyChanged(nameof(NanoEurPrice));
         }
 

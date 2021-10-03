@@ -16,6 +16,14 @@ namespace Nandro.Views
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+
+            this.FindControl<ComboBox>("CurrencyComboBox").SelectionChanged += SettingsView_SelectionChanged;
+        }
+
+        private void SettingsView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.RemovedItems.Count == 1)
+                ViewModel.UpdateCurrencyWarning();
         }
     }
 }

@@ -3,13 +3,12 @@ using Avalonia.ReactiveUI;
 using Nandro.Data;
 using Nandro.Nano;
 using Nandro.NFC;
+using Nandro.Providers;
 using Nandro.TransactionMonitors;
 using Nandro.ViewModels;
 using Nandro.Views;
-using NdefLibrary.Ndef;
 using ReactiveUI;
 using Splat;
-using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -43,6 +42,7 @@ namespace Nandro
             var config = dbContext.Configuration.Single();
 
             Locator.CurrentMutable.RegisterConstant(config);
+            Locator.CurrentMutable.Register(() => new CartView(), typeof(IViewFor<CartViewModel>));
             Locator.CurrentMutable.Register(() => new HomeView(), typeof(IViewFor<HomeViewModel>));
             Locator.CurrentMutable.Register(() => new PaymentView(), typeof(IViewFor<PaymentViewModel>));
             Locator.CurrentMutable.Register(() => new ProductsView(), typeof(IViewFor<ProductsViewModel>));
@@ -51,6 +51,7 @@ namespace Nandro
             Locator.CurrentMutable.Register(() => new TransactionResultView(), typeof(IViewFor<TransactionResultViewModel>));
 
             Locator.CurrentMutable.RegisterLazySingleton(() => new PriceProvider());
+            Locator.CurrentMutable.RegisterLazySingleton(() => new CurrencyProvider());
             Locator.CurrentMutable.RegisterLazySingleton(() => new NanoEndpointsTester());
 
             Locator.CurrentMutable.RegisterLazySingleton(() => dbContext);

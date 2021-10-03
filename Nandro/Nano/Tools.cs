@@ -58,6 +58,9 @@ namespace Nandro.Nano
 
         public static bool ValidateAccount(string account)
         {
+            if (String.IsNullOrEmpty(account))
+                return false;
+
             const string pattern = "^(nano|xrb)_[13]{1}[13456789abcdefghijkmnopqrstuwxyz]{59}$";
             var regex = new Regex(pattern);
             return regex.IsMatch(account);

@@ -1,32 +1,38 @@
 ﻿using CoinGecko.Clients;
+using Splat;
 using System;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Nandro
+namespace Nandro.Providers
 {
     class PriceProvider : IDisposable
     {
+        public const string UsdCode = "USD";
+        public const string EurCode = "EUR";
+
         private MinuteTimer _timer;
+        private string _currencyCode;
         private HttpClient _httpClient;
-        private SimpleClient _client;
+        private SimpleClient _coinGeckoClient;
         private static readonly object _lockObject = new object();
 
+        public decimal CurrencyPrice { get; private set; }
         public decimal UsdPrice { get; private set; }
         public decimal EurPrice { get; private set; }
         public bool UpToDate { get; private set; }
-        public bool Initialized => UsdPrice != 0 && EurPrice != 0;
+        public bool Initialized => UsdPrice != 0 && EurPrice != 0 && CurrencyPrice != 0;
 
         public PriceProvider()
         {
             _httpClient = new HttpClient();
-            _client = new SimpleClient(_httpClient);
+            _coinGeckoClient = new SimpleClient(_httpClient);
             _timer = new MinuteTimer(GetNanoPrice, false);
         }
 
         public void Initialize()
         {
+            _currencyCode = Locator.Current.GetService<Configuration>().CurrencyCode.ToLower();
+
             GetNanoPrice();
         }
 
@@ -52,16 +58,28 @@ namespace Nandro
             }
         }
 
+        public decimal CurrencyToNano(decimal amount)
+        {
+            lock (_lockObject)
+            {
+                if (CurrencyPrice == 0)
+                    throw new InvalidOperationException($"{_currencyCode} price not initialized");
+
+                return amount / CurrencyPrice;
+            }
+        }
+
         private void GetNanoPrice()
         {
             try
             {
-                var result = _client.GetSimplePrice(new[] { "nano" }, new[] { "usd", "eur" }).Result;
+                var result = _coinGeckoClient.GetSimplePrice(new[] { "nano" }, new[] { UsdCode.ToLower(), EurCode.ToLower(), _currencyCode }).Result;
 
                 lock (_lockObject)
                 {
-                    UsdPrice = result["nano"]["usd"].Value;
-                    EurPrice = result["nano"]["eur"].Value;
+                    UsdPrice = result["nano"][UsdCode.ToLower()].Value;
+                    EurPrice = result["nano"][EurCode.ToLower()].Value;
+                    CurrencyPrice = result["nano"][_currencyCode].Value;
                 }
                 UpToDate = true;
             }
